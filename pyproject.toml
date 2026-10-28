@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "run-it-then-cite-it"
+version = "0.1.0"
+description = "Research prototype: an agent that verifies claims about library behaviour by execution and its citations by mutation."
+requires-python = ">=3.10"
+dependencies = [
+    "google-genai>=1.0",
+    "mistralai>=1.0",
+    "openai>=1.0",
+    "libcst>=1.1",
+    "rank_bm25>=0.2.2",
+    "jedi>=0.19",
+    "pydantic>=2.5",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "pytest>=7.4",
+    "hypothesis>=6.90",
+]
+
+[tool.setuptools.packages.find]
+# Flat layout with several top-level packages. `find` (not an explicit list)
+# so that a checkout holding only some member bundles still installs.
+include = [
+    "core*", "llm*", "sandbox*", "tools*", "retrieval*", "data*",
+    "annotation*", "agent*", "baselines*", "eval*", "analysis*", "scripts*",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+# toylib and other fixtures are data for the tests, not tests themselves.
+norecursedirs = ["fixtures", ".*"]
+markers = [
+    "docker: needs a running Docker daemon and the sandbox image",
+    "live: calls real external APIs (uses quota)",
+]

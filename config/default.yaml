@@ -1,0 +1,102 @@
+# Single configuration file shared by every system (CLAUDE.md §2.3).
+# Systems differ only in control logic; everything here is common unless a
+# section is explicitly per-system (agent.ablation, baselines.*).
+# Model IDs live here and nowhere else (§2.4).
+
+paths:
+  cache_dir: .cache
+  llm_cache: .cache/llm.sqlite
+  github_cache: .cache/github
+  trees_dir: .cache/trees
+  index_dir: .cache/indexes
+  repos_dir: data/repos
+  results_dir: results
+  traces_dir: results/traces
+
+llm:
+  temperature: 0.0
+  max_output_tokens: 4096
+  main:
+    provider: gemini
+    model: gemini-3.1-flash-lite
+    # Leave unset (null) to use the provider default; see §2.4.
+    thinking_level: null
+    rpm: 15
+    rpd: 500
+  judge:
+    # Development / mid-submission judge (P0-P7). The final judge is chosen at P8.
+    # llama-3.1-8b-instant was retired by Groq (404 at G0, 2026-10-28); see D-02.
+    provider: groq
+    model: openai/gpt-oss-20b
+    # Starting guesses; real limits are learned from 429s and logged in docs/quota.md.
+    rpm: 30
+    rpd: 1000
+  retry:
+    max_attempts: 6
+    base_delay_s: 2.0
+    max_delay_s: 90.0
+  quota_log: docs/quota.md
+
+sandbox:
+  image: rtci-sandbox:py310
+  python: "3.10"
+  cpus: 1
+  memory: 1g
+  pids_limit: 256
+  probe_timeout_s: 10
+  job_timeout_s: 120
+  repo_test_timeout_s: 120
+
+mutation:
+  operators: [constant, negate_condition, swap_comparison, delete_statement, return_none]
+  max_mutants_per_line: 12
+  max_group_pairs: 6
+  breakage_types: [SyntaxError, IndentationError, ImportError, ModuleNotFoundError, NameError, UnboundLocalError]
+  local_breakage_types: [TypeError, AttributeError]
+
+data:
+  libraries:
+    click: {owner: pallets, repo: click, package: click, tests_dir: tests}
+    marshmallow: {owner: marshmallow-code, repo: marshmallow, package: marshmallow, tests_dir: tests}
+    attrs: {owner: python-attrs, repo: attrs, package: attr, tests_dir: tests}
+    python-dateutil: {owner: dateutil, repo: dateutil, package: dateutil, tests_dir: tests}
+  active_libraries: [click, marshmallow]
+  merged_since: "2020-01-01"
+  max_source_files: 10
+  min_validated_pairs: 120
+  split_seed: 82
+  dev_size: 20
+
+retrieval:
+  code_top_k: 5
+  doc_top_k: 3
+
+tools:
+  open_file_max_lines: 200
+  search_default_k: 5
+  git_log_default_n: 10
+
+agent:
+  max_investigation_steps: 8
+  max_probe_runs: 12
+  max_probe_repairs: 2
+  max_requests_per_question: 40
+  ablation:
+    no_execution: false        # A1
+    no_mutation: false         # A2
+    flag_only: false           # A3
+    whole_answer_probe: false  # A4
+    selective: false           # A5
+    retrieval: standard        # A10: standard | none | oracle
+    llm_conflicts: false       # A7
+    no_repair: false           # A8
+    constants_only: false      # A11
+
+baselines:
+  b2_extra_steps: 0  # B2+ sets this from the pilot's median tokens per question
+
+eval:
+  bootstrap_resamples: 10000
+  bootstrap_seed: 82
+  ci_level: 0.95
+  kappa_threshold: 0.6
