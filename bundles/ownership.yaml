@@ -1,0 +1,90 @@
+# Who owns which file (CLAUDE.md §3). Every file belongs to exactly one member.
+# Rules are glob patterns matched against repo-relative paths; the FIRST matching
+# rule wins, so specific rules come before broad ones. A file that matches no
+# rule is an error in scripts/make_bundles.py.
+#
+# Push order is also the import order: a bundle may import at module level only
+# from its own files or from members earlier in this list.
+
+push_order: [sunil, ameya, aditya, sourav]
+
+members:
+  sunil:
+    name: Sunil Kumar
+    github: Suniljadaun
+    area: foundation
+  ameya:
+    name: Ameya Purohit
+    github: ameya-purohit
+    area: llm-data-agent
+  aditya:
+    name: Aditya Narayan Dwivedi
+    github: adityaND19
+    area: sandbox-baselines
+  sourav:
+    name: Sourav Nath
+    github: Sourav-Nath-01
+    area: mutation-eval
+
+rules:
+  # --- Specific exceptions inside broader areas ---------------------------
+  - {pattern: "tools/probe.py", owner: aditya}
+  - {pattern: "tools/mutate.py", owner: sourav}
+  - {pattern: "docs/explainers/llm_client.md", owner: ameya}
+  - {pattern: "docs/explainers/data_pipeline.md", owner: ameya}
+  - {pattern: "docs/explainers/agent.md", owner: ameya}
+  - {pattern: "docs/explainers/sandbox.md", owner: aditya}
+  - {pattern: "docs/explainers/baselines.md", owner: aditya}
+  - {pattern: "docs/explainers/mutation.md", owner: sourav}
+  - {pattern: "docs/explainers/evaluation.md", owner: sourav}
+  - {pattern: "scripts/smoke_llm.py", owner: ameya}
+  - {pattern: "scripts/run_all.py", owner: ameya}
+  - {pattern: "scripts/quota_plan.py", owner: ameya}
+
+  # --- Ameya: LLM layer, data pipeline, agent ------------------------------
+  - {pattern: "llm/**", owner: ameya}
+  - {pattern: "data/**", owner: ameya}
+  - {pattern: "agent/**", owner: ameya}
+  - {pattern: "tests/llm/**", owner: ameya}
+  - {pattern: "tests/data/**", owner: ameya}
+  - {pattern: "tests/agent/**", owner: ameya}
+
+  # --- Aditya: sandbox, baselines ------------------------------------------
+  - {pattern: "sandbox/**", owner: aditya}
+  - {pattern: "baselines/**", owner: aditya}
+  - {pattern: "tests/sandbox/**", owner: aditya}
+  - {pattern: "tests/baselines/**", owner: aditya}
+
+  # --- Sourav: mutation, toylib, evaluation, analysis ----------------------
+  - {pattern: "tests/fixtures/toylib/**", owner: sourav}
+  - {pattern: "tests/mutation/**", owner: sourav}
+  - {pattern: "eval/**", owner: sourav}
+  - {pattern: "analysis/**", owner: sourav}
+  - {pattern: "results/**", owner: sourav}
+  - {pattern: "tests/eval/**", owner: sourav}
+  - {pattern: "tests/analysis/**", owner: sourav}
+
+  # --- Sunil: foundation, retrieval, tools, annotation, docs ---------------
+  - {pattern: "pyproject.toml", owner: sunil}
+  - {pattern: "requirements.txt", owner: sunil}
+  - {pattern: "config/**", owner: sunil}
+  - {pattern: "core/**", owner: sunil}
+  - {pattern: ".gitignore", owner: sunil}
+  - {pattern: ".env.example", owner: sunil}
+  - {pattern: "README.md", owner: sunil}
+  - {pattern: "CLAUDE.md", owner: sunil}
+  - {pattern: "DECISIONS.md", owner: sunil}
+  - {pattern: "PREREGISTRATION.md", owner: sunil}
+  - {pattern: "docs/**", owner: sunil}
+  - {pattern: ".github/**", owner: sunil}
+  - {pattern: "retrieval/**", owner: sunil}
+  - {pattern: "tools/**", owner: sunil}
+  - {pattern: "annotation/**", owner: sunil}
+  - {pattern: "bundles/**", owner: sunil}
+  - {pattern: "scripts/**", owner: sunil}
+  - {pattern: "tests/conftest.py", owner: sunil}
+  - {pattern: "tests/core/**", owner: sunil}
+  - {pattern: "tests/retrieval/**", owner: sunil}
+  - {pattern: "tests/tools/**", owner: sunil}
+  - {pattern: "tests/annotation/**", owner: sunil}
+  - {pattern: "tests/bundles/**", owner: sunil}

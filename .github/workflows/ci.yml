@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  secret-scan:
+    # The repo is public. Fail if anything that looks like a real API key is committed.
+    # Patterns match the full key shape, so prose that merely mentions a prefix passes.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for API keys
+        run: |
+          if grep -rInE --exclude-dir=.git \
+               -e 'AIza[0-9A-Za-z_-]{35}' \
+               -e 'gsk_[0-9A-Za-z]{40,}' \
+               -e 'gh[pousr]_[0-9A-Za-z]{36}' \
+               -e 'github_pat_[0-9A-Za-z_]{40,}' . ; then
+            echo "::error::Possible API key committed (see matches above)"
+            exit 1
+          fi
+          echo "no keys found"
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -m "not docker and not live"
+
+  docker:
+    # Builds the sandbox image and runs the Docker tests. Skipped until sandbox/ exists.
+    # hashFiles() is only allowed at step level, so each step carries the condition.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: ${{ hashFiles('sandbox/Dockerfile') != '' }}
+        with:
+          python-version: "3.10"
+      - if: ${{ hashFiles('sandbox/Dockerfile') != '' }}
+        run: pip install -r requirements.txt
+      - name: Build sandbox image
+        if: ${{ hashFiles('sandbox/Dockerfile') != '' }}
+        run: docker build -t rtci-sandbox:py310 sandbox
+      - if: ${{ hashFiles('sandbox/Dockerfile') != '' }}
+        run: python -m pytest -m docker

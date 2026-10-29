@@ -1,0 +1,20 @@
+# Python dependencies (Python 3.10 or newer). Install with:
+#   pip install -r requirements.txt
+# Minimum versions, not exact pins, so the same file works on Python 3.10 (CI, sandbox)
+# and newer interpreters. The exact versions used by each run are logged with its results.
+# Keep in sync with [project.dependencies] in pyproject.toml (a test checks this).
+google-genai>=1.0
+mistralai>=1.0
+openai>=1.0
+libcst>=1.1
+rank_bm25>=0.2.2
+jedi>=0.19
+pydantic>=2.5
+pyyaml>=6.0
+requests>=2.31
+python-dotenv>=1.0
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+pytest>=7.4
+hypothesis>=6.90

@@ -1,0 +1,28 @@
+# Secrets: never commit (the repo is public).
+.env
+
+# Local environment and caches
+.venv/
+.cache/
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+build/
+dist/
+
+# Bare clones of the studied libraries (large, reproducible from freeze.py)
+data/repos/
+
+# Raw per-question results and traces; summaries under results/summary/ are committed
+results/*/
+!results/summary/
+
+# Bundles are built locally and pushed by each member, never committed
+bundles/*.zip
+bundles/build/
+
+# Editor
+.vscode/
+.idea/
