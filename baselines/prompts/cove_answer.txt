@@ -1,0 +1,6 @@
+Answer this question about the library by reading its code with the read-only tools (nothing can be executed). You have at most {steps} steps.
+
+Question:
+{question}
+
+Then call answer_verification with a short answer and the file and line that support it.
