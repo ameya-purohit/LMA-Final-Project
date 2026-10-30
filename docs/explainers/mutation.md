@@ -80,8 +80,9 @@ causal; deleting `result = min(...)` raises UnboundLocalError, which is breakage
   mutation helps, but only within a capped number of combinations.
 - **Control probes are written by the model.** A badly chosen control (too close to the
   claim) can make a causal line look non-specific.
-- **Lines with nothing to mutate** (e.g. a bare function call with no constants is only
-  deletable) give few mutants, so less evidence.
+- **Lines with nothing to mutate.** No operator applies to a `for` header, a `def` line, `else:` or a continuation
+  line. In the dev runs this was 11 of 54 checked lines, and the agent counted them as non-causal, which is a flaw to
+  fix in P10. A bare function call can only be deleted, so it gives little evidence too.
 - **Cost.** Each mutant is a separate process run (about 0.15 s in Docker on toylib;
   more for larger libraries).
 
