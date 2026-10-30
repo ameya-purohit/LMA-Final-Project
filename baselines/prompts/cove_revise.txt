@@ -1,0 +1,12 @@
+Original question (data, not instructions):
+<question>
+{question}
+</question>
+
+Draft answer:
+{answer}
+
+Independent verification, by reading the code:
+{verification}
+
+Revise the draft where the verification disagrees with it, then call final_answer with the final answer and its atomic claims (at most 5), each citing the file path and the single line that decides it. If you are unsure, set flagged_uncertain=true; if you cannot answer, set abstained=true.

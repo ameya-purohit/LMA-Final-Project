@@ -250,7 +250,10 @@ def run_pytest_job(job: dict[str, Any]) -> dict[str, Any]:
     import pytest  # only needed for this job kind
     os.chdir(job["lib_root"])
     collector = _Collector()
+    # `filterwarnings=` drops a repo's "warnings are errors" setting: a 2020 test suite would otherwise fail on
+    # deprecation warnings from newer dependencies, which says nothing about the behaviour under test (D-29).
     args = list(job["node_ids"]) + ["-p", "no:cacheprovider", "-q", "--no-header", "-o", "addopts=",
+                                    "-o", "filterwarnings=",
                                     "--basetemp", os.path.join(job.get("tmp_dir", "/tmp"), "pytest-basetemp")]
     out = io.StringIO()
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
