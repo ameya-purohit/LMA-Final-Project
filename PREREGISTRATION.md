@@ -134,3 +134,14 @@ Planned deviations from `docs/proposal_v2.md`, known before any run:
   `sys.settrace` instead of coverage.py.
 - **2026-10-27. Free-tier model** (`gemini-3.1-flash-lite`) instead of a paid
   model; cost is reported in requests and tokens.
+- **2026-10-30. Pre-2020 issues are kept when the fix merged in 2020 or later.** The proposal says questions
+  from 2020 onwards; CLAUDE.md §6.9 applies the cutoff to the merge date, because the frozen commit is the fix's
+  base commit. Of 176 questions, 43 were opened before 2020. Results can be split on this.
+- **2026-10-30. Partial answers count as wrong** (D-41), fixed before any metric was computed.
+- **2026-10-30. Final judge is Groq `openai/gpt-oss-120b`** (D-37, D-42). Ameya decided not to add a Mistral key, so
+  there is no re-judging with Mistral. The test-set size is chosen at G2 to fit the judge's daily token limit too.
+- **2026-10-30. Feature-request filter planned** (D-43), to apply when the split is rebuilt at G1, before the test set
+  is locked: issues with a feature or enhancement label, or GitHub issue type Feature, are dropped, with each removal logged.
+- **2026-10-30. Preliminary dev runs happened before gate G1**, for the mid submission. The split will be rebuilt
+  after the spot check, and dev questions may then change. No test question has been run. Prompts were not
+  iterated between these runs.

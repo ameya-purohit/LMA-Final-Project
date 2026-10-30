@@ -36,7 +36,8 @@ include = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-addopts = "--import-mode=importlib"
+# Default runs skip Docker and live-API tests; `pytest -m docker` or `-m live` overrides this.
+addopts = "--import-mode=importlib -m 'not docker and not live'"
 # toylib and other fixtures are data for the tests, not tests themselves.
 norecursedirs = ["fixtures", ".*"]
 markers = [
