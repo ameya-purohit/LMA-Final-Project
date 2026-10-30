@@ -1,0 +1,210 @@
+{
+ "a6": [
+  {
+   "claim": "C1: clamp(-1, strict=False) raises ValueError",
+   "line": 88,
+   "mark": "decider",
+   "ground_truth_causal": true,
+   "n_mutants": 7,
+   "any_flip": true,
+   "behavioural": true,
+   "specific": true,
+   "specific_constants_only": true,
+   "n_mutants_constants_only": 4
+  },
+  {
+   "claim": "C1: clamp(-1, strict=False) raises ValueError",
+   "line": 12,
+   "mark": "strict_default",
+   "ground_truth_causal": false,
+   "n_mutants": 2,
+   "any_flip": true,
+   "behavioural": false,
+   "specific": false,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 1
+  },
+  {
+   "claim": "C1: clamp(-1, strict=False) raises ValueError",
+   "line": 16,
+   "mark": "overrides",
+   "ground_truth_causal": false,
+   "n_mutants": 3,
+   "any_flip": false,
+   "behavioural": false,
+   "specific": false,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 2
+  },
+  {
+   "claim": "C2: clamp(500, strict=False) == 100",
+   "line": 20,
+   "mark": "limit",
+   "ground_truth_causal": true,
+   "n_mutants": 4,
+   "any_flip": true,
+   "behavioural": true,
+   "specific": true,
+   "specific_constants_only": true,
+   "n_mutants_constants_only": 3
+  },
+  {
+   "claim": "C2: clamp(500, strict=False) == 100",
+   "line": 91,
+   "mark": "return_result",
+   "ground_truth_causal": false,
+   "n_mutants": 2,
+   "any_flip": true,
+   "behavioural": true,
+   "specific": false,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 0
+  },
+  {
+   "claim": "C2: clamp(500, strict=False) == 100",
+   "line": 90,
+   "mark": "min_result",
+   "ground_truth_causal": true,
+   "n_mutants": 1,
+   "any_flip": true,
+   "behavioural": false,
+   "specific": false,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 0
+  },
+  {
+   "claim": "Redundant guards: safe_div(1, 0) raises ValueError",
+   "line": 49,
+   "mark": "guard_inline",
+   "ground_truth_causal": false,
+   "n_mutants": 6,
+   "any_flip": false,
+   "behavioural": false,
+   "specific": false,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 3
+  },
+  {
+   "claim": "Redundant guards: safe_div(1, 0) raises ValueError",
+   "line": 50,
+   "mark": "guard_helper",
+   "ground_truth_causal": false,
+   "n_mutants": 1,
+   "any_flip": false,
+   "behavioural": false,
+   "specific": false,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 0
+  },
+  {
+   "claim": "at_least(18, 18) is True",
+   "line": 61,
+   "mark": "compare_no_const",
+   "ground_truth_causal": true,
+   "n_mutants": 2,
+   "any_flip": true,
+   "behavioural": true,
+   "specific": true,
+   "specific_constants_only": false,
+   "n_mutants_constants_only": 0
+  }
+ ],
+ "leniency": [
+  {
+   "claim": "C1: clamp(-1, strict=False) raises ValueError",
+   "executed_lines": [
+    28,
+    30,
+    32,
+    82,
+    87,
+    88
+   ],
+   "n_executed": 6,
+   "accepted": {
+    "any_flip": [
+     88
+    ],
+    "behavioural": [
+     88
+    ],
+    "specific": [
+     88
+    ]
+   },
+   "share_any_flip": 0.16666666666666666,
+   "share_behavioural": 0.16666666666666666,
+   "share_specific": 0.16666666666666666
+  },
+  {
+   "claim": "C2: clamp(500, strict=False) == 100",
+   "executed_lines": [
+    28,
+    30,
+    32,
+    82,
+    87,
+    88,
+    90,
+    91
+   ],
+   "n_executed": 8,
+   "accepted": {
+    "any_flip": [
+     88,
+     90,
+     91
+    ],
+    "behavioural": [
+     88,
+     91
+    ],
+    "specific": []
+   },
+   "share_any_flip": 0.375,
+   "share_behavioural": 0.25,
+   "share_specific": 0.0
+  },
+  {
+   "claim": "Redundant guards: safe_div(1, 0) raises ValueError",
+   "executed_lines": [
+    41,
+    49
+   ],
+   "n_executed": 2,
+   "accepted": {
+    "any_flip": [],
+    "behavioural": [],
+    "specific": []
+   },
+   "share_any_flip": 0.0,
+   "share_behavioural": 0.0,
+   "share_specific": 0.0
+  },
+  {
+   "claim": "at_least(18, 18) is True",
+   "executed_lines": [
+    54,
+    61,
+    62
+   ],
+   "n_executed": 3,
+   "accepted": {
+    "any_flip": [
+     61,
+     62
+    ],
+    "behavioural": [
+     61,
+     62
+    ],
+    "specific": [
+     61
+    ]
+   },
+   "share_any_flip": 0.6666666666666666,
+   "share_behavioural": 0.6666666666666666,
+   "share_specific": 0.3333333333333333
+  }
+ ]
+}
