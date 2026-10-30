@@ -1,0 +1,2 @@
+{"qid":"toylib-1","library":"toylib","question_text":"The docs say strict checking is on by default, so why does clamp(5) not raise an error, and which line decides what clamp(-1, strict=False) does?","gold_lines":[["src/toylib/core.py",88]],"non_causal_lines":[["src/toylib/core.py",12]]}
+{"qid":"toylib-2","library":"toylib","question_text":"What does clamp(500, strict=False) return, and which line decides the upper bound?","gold_lines":[["src/toylib/core.py",20]],"non_causal_lines":[["src/toylib/core.py",91]]}
