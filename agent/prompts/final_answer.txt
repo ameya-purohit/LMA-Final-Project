@@ -1,0 +1,12 @@
+The claim table after verification. Grades: E+C = executed and causally cited; E = executed; T = a repository test passed; R = read in code only; D = documentation only.
+{table}
+
+Conflicts between documentation and execution:
+{conflicts}
+
+Call final_answer with the answer to the developer's question, written from this table:
+- State as fact only claims with status confirmed (or read_supported if nothing could be executed).
+- Report observed output literally ("running X gives Y") and state each conflict with what was observed, e.g. "the docs say X, but executing it gives Y, decided at path:line".
+- Mention refuted or unverified claims only as unverified, never as fact. Name the scope that was actually tested.
+- Name the deciding file and line for each main claim.
+- Set abstained=true only if there is no evidence to answer at all.

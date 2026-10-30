@@ -1,0 +1,4 @@
+These probes did not run properly, for reasons unrelated to the claim (a wrong import, bad setup, an error in the probe itself):
+{failures}
+
+Call write_probe again with corrected probes for these claims only, in the same format.

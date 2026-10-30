@@ -1,0 +1,4 @@
+Check these claims by reading the code you have seen (nothing can be executed):
+{claims}
+
+Call verify_by_reading with a verdict for each claim: is it supported by the frozen code?

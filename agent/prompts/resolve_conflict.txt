@@ -1,0 +1,5 @@
+The documentation and execution disagree about claim [{claim_id}].
+Claim: {claim}
+Observed: {observed}
+
+Call resolve_conflict to say which source the final answer should follow.

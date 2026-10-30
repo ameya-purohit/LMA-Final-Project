@@ -1,0 +1,4 @@
+Running these probes contradicted their claims:
+{refutations}
+
+A wrong probe can refute a correct claim. For each one, compare the probe's setup (arguments, configuration, environment) with the scenario in the question, and call assess_refutation. Answer setup_matches_question=false only if the probe set up a different scenario from the question's.
