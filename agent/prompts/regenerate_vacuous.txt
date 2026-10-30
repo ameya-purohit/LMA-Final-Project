@@ -1,0 +1,4 @@
+The probe for claim [{claim_id}] is vacuous: no mutation of the code that supposedly decides this behaviour changed its outcome, so the probe does not really test the claim.
+Claim: {claim}
+
+Call write_probe with a new probe for this claim only, one that actually exercises the behaviour, in the same format.

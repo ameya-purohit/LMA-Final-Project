@@ -1,0 +1,6 @@
+The claim [{claim_id}] was confirmed by running the code, but its citation is not causal: changing the cited line did not specifically change this behaviour.
+Claim: {claim}
+Mutation results:
+{report}
+
+Your next goal: find the line that decides this. Use definitions, references and history; follow values upward to where they are set or overridden. You have {steps} investigation steps left. Then call propose_citation with the single line you now believe decides it.

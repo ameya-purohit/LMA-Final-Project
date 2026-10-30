@@ -1,0 +1,14 @@
+Claims to check by running code:
+{claims}
+
+Call write_probe with ONE probe for EACH claim above, all in this one call. Each probe and each control is a complete Python file defining exactly two functions:
+
+    def observe():      # performs the scenario and returns the observed value (it may raise)
+    def test_claim():   # asserts the claim
+
+Rules for probes:
+- Import the library as `{package}` (it is already importable). Standard library, pytest and hypothesis are available. There is no network; write files only under /tmp.
+- An instance claim is tested as stated. A general claim is tested on at least 3 inputs including boundary values, or with a hypothesis test (derandomize=True, max_examples<=50).
+- test_claim must fail if the claim is false; use pytest.raises for claimed exceptions.
+- Each probe needs 1-2 control probes: the same entry point with inputs that exercise behaviour unrelated to the claim. A control's test_claim asserts what that unrelated call does.
+- Never call the system, start processes, or open sockets.

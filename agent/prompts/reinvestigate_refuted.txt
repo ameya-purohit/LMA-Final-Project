@@ -1,0 +1,5 @@
+Claim [{claim_id}] was refuted by running the code.
+Claim: {claim}
+Observed: {observed}
+
+The observed output is a fact. Your next goal: find out why the code behaves this way. You have {steps} investigation steps left. Then call revise_claim with a corrected claim that matches the observed behaviour, citing the line that decides it.

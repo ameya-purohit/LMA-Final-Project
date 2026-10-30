@@ -1,0 +1,4 @@
+These probes set up a different scenario from the question's:
+{claims}
+
+Call write_probe with rewritten probes for these claims only, in the same format, matching the question's scenario.
