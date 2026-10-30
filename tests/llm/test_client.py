@@ -175,7 +175,7 @@ def test_params_from_config_and_role_routing(tmp_path):
     client.complete(MSGS, role="judge")
     (m1, _, _, p1), (m2, _, _, p2) = fake.calls
     assert m1 == "gemini-3.1-flash-lite" and p1["temperature"] == 0.0 and p1["thinking_level"] == "low"
-    assert m2 == "openai/gpt-oss-20b" and "thinking_level" not in p2
+    assert m2 == "openai/gpt-oss-120b" and "thinking_level" not in p2
     with pytest.raises(ValueError):
         client.complete(MSGS, role="other")
 

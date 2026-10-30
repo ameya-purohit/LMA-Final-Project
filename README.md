@@ -28,7 +28,7 @@ Chain-of-Verification. The method is specified in
 | `core/` | Config loading, JSONL helpers, key checks |
 | `llm/` | One LLM client (Gemini for systems, Groq/Mistral for the judge), cache, tracing |
 | `sandbox/` | Docker image and the trusted probe runner |
-| `tools/` | Agent tools: search, files, static analysis, history, probes, mutation |
+| `tools/` | Agent tools: search, files, static analysis, history, probes, mutation; the workspace |
 | `retrieval/` | Chunker and BM25 indexes over the frozen repo |
 | `data/` | Mining issue-fix pairs, freezing, validation, automatic gold |
 | `agent/` | Our agent (claim table, execution and mutation checks) |
@@ -104,10 +104,33 @@ Two more markers, run when available:
 
 ### 7. Run the pipeline
 
-TODO(added as each phase lands): mining and validating the dataset, building the
-sandbox, running every system, judging, and regenerating all tables and figures
-with one command (`scripts/run_all.py`). Progress is tracked in
-[docs/progress.md](docs/progress.md).
+Every step below is resumable and caches its work, so re-running it is free. API calls use your free-tier quota.
+
+```bash
+# Build the sandbox image (once)
+docker build -t rtci-sandbox:py310 sandbox
+
+# Dataset: mine GitHub, validate each pair by running its tests, build gold, split
+python scripts/mine_pairs.py
+python data/validate_pairs.py --workers 6
+python data/build_gold.py
+python data/split.py
+python data/validate_questions.py data/questions_dev.jsonl data/questions_test.jsonl
+
+# Zero-cost ablations on the planted library (no API calls)
+python -m analysis.toylib_ablations
+
+# Sanity check: one live run on toylib
+python scripts/live_toylib.py --systems ours b0 b1 b2
+
+# Experiments on the dev set: run, judge, report
+python scripts/run_all.py --by-question --limit 20 --systems ours b2 a2 a3 a1 --split dev --run-id mid
+python -m eval.report --run-id mid --split dev
+```
+
+Exit code 3 from `run_all.py` means the free daily quota ran out. Finished answers are saved: run the same command
+after the reset (midnight Pacific time) to continue. The test set is locked: `eval.run` refuses it without
+`--allow-test`, which must not be used before gate G2. Progress is tracked in [docs/progress.md](docs/progress.md).
 
 ## How code reaches GitHub
 

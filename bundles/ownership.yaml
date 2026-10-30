@@ -16,7 +16,7 @@ members:
   ameya:
     name: Ameya Purohit
     github: ameya-purohit
-    area: llm-data-agent
+    area: llm-agent
   aditya:
     name: Aditya Narayan Dwivedi
     github: adityaND19
@@ -27,35 +27,46 @@ members:
     area: mutation-eval
 
 rules:
+  # Ownership follows docs/work_split.md (it replaced CLAUDE.md §3 after the mid bundles).
   # --- Specific exceptions inside broader areas ---------------------------
   - {pattern: "tools/probe.py", owner: aditya}
   - {pattern: "tools/mutate.py", owner: sourav}
   - {pattern: "docs/explainers/llm_client.md", owner: ameya}
-  - {pattern: "docs/explainers/data_pipeline.md", owner: ameya}
   - {pattern: "docs/explainers/agent.md", owner: ameya}
+  - {pattern: "docs/explainers/pilot.md", owner: ameya}
+  - {pattern: "docs/pilot_report.md", owner: ameya}
+  - {pattern: "docs/prompt_log.md", owner: ameya}
   - {pattern: "docs/explainers/sandbox.md", owner: aditya}
+  - {pattern: "docs/explainers/gold_validation.md", owner: aditya}
   - {pattern: "docs/explainers/baselines.md", owner: aditya}
   - {pattern: "docs/explainers/mutation.md", owner: sourav}
   - {pattern: "docs/explainers/evaluation.md", owner: sourav}
+  - {pattern: "docs/explainers/analysis.md", owner: sourav}
+  - {pattern: "docs/results.md", owner: sourav}
   - {pattern: "scripts/smoke_llm.py", owner: ameya}
-  - {pattern: "scripts/run_all.py", owner: ameya}
-  - {pattern: "scripts/quota_plan.py", owner: ameya}
 
-  # --- Ameya: LLM layer, data pipeline, agent ------------------------------
+  # --- Ameya: LLM layer, the agent, the pilot ------------------------------
   - {pattern: "llm/**", owner: ameya}
-  - {pattern: "data/**", owner: ameya}
   - {pattern: "agent/**", owner: ameya}
   - {pattern: "tests/llm/**", owner: ameya}
-  - {pattern: "tests/data/**", owner: ameya}
   - {pattern: "tests/agent/**", owner: ameya}
 
-  # --- Aditya: sandbox, baselines ------------------------------------------
+  # --- Aditya: sandbox, gold validation, baselines, extra datasets ---------
   - {pattern: "sandbox/**", owner: aditya}
   - {pattern: "baselines/**", owner: aditya}
+  - {pattern: "data/validate_pairs.py", owner: aditya}
+  - {pattern: "data/build_gold.py", owner: aditya}
+  - {pattern: "data/controlled.py", owner: aditya}
+  - {pattern: "data/adversarial.py", owner: aditya}
+  - {pattern: "data/questions_*.jsonl", owner: aditya}
+  - {pattern: "data/dropped.jsonl", owner: aditya}
+  - {pattern: "data/mining_report.md", owner: aditya}
+  - {pattern: "data/validated_pairs.jsonl", owner: aditya}
   - {pattern: "tests/sandbox/**", owner: aditya}
+  - {pattern: "tests/gold/**", owner: aditya}
   - {pattern: "tests/baselines/**", owner: aditya}
 
-  # --- Sourav: mutation, toylib, evaluation, analysis ----------------------
+  # --- Sourav: mutation, toylib, evaluation, judging, analysis -------------
   - {pattern: "tests/fixtures/toylib/**", owner: sourav}
   - {pattern: "tests/mutation/**", owner: sourav}
   - {pattern: "eval/**", owner: sourav}
@@ -64,7 +75,7 @@ rules:
   - {pattern: "tests/eval/**", owner: sourav}
   - {pattern: "tests/analysis/**", owner: sourav}
 
-  # --- Sunil: foundation, retrieval, tools, annotation, docs ---------------
+  # --- Sunil: foundation, data mining, retrieval, tools, pipeline scripts --
   - {pattern: "pyproject.toml", owner: sunil}
   - {pattern: "requirements.txt", owner: sunil}
   - {pattern: "config/**", owner: sunil}
@@ -77,6 +88,7 @@ rules:
   - {pattern: "PREREGISTRATION.md", owner: sunil}
   - {pattern: "docs/**", owner: sunil}
   - {pattern: ".github/**", owner: sunil}
+  - {pattern: "data/**", owner: sunil}
   - {pattern: "retrieval/**", owner: sunil}
   - {pattern: "tools/**", owner: sunil}
   - {pattern: "annotation/**", owner: sunil}
@@ -84,6 +96,7 @@ rules:
   - {pattern: "scripts/**", owner: sunil}
   - {pattern: "tests/conftest.py", owner: sunil}
   - {pattern: "tests/core/**", owner: sunil}
+  - {pattern: "tests/data_mining/**", owner: sunil}
   - {pattern: "tests/retrieval/**", owner: sunil}
   - {pattern: "tests/tools/**", owner: sunil}
   - {pattern: "tests/annotation/**", owner: sunil}

@@ -23,7 +23,7 @@ def test_model_ids_only_in_config():
     cfg = C.load_config()
     assert cfg["llm"]["main"]["model"] == "gemini-3.1-flash-lite"
     assert cfg["llm"]["judge"]["provider"] == "groq"
-    assert cfg["llm"]["judge"]["model"] == "openai/gpt-oss-20b"
+    assert cfg["llm"]["judge"]["model"] == "openai/gpt-oss-120b"
 
 
 def test_overrides_from_dict_and_file(tmp_path: Path):

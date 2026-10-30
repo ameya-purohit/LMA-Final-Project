@@ -21,15 +21,16 @@ llm:
     model: gemini-3.1-flash-lite
     # Leave unset (null) to use the provider default; see §2.4.
     thinking_level: null
+    # Measured from Google's own 429s on 2026-10-30 (docs/quota.md): 15 per minute, 500 per day, 250,000 input tokens per minute.
     rpm: 15
     rpd: 500
   judge:
-    # Development / mid-submission judge (P0-P7). The final judge is chosen at P8.
-    # llama-3.1-8b-instant was retired by Groq (404 at G0, 2026-10-28); see D-02.
+    # Final judge chosen at P8 (D-37) and kept by Ameya without a Mistral key (D-42): Groq gpt-oss-120b, throttled.
+    # One judge per experiment: the test-set size at G2 is chosen so that its daily token limit is enough.
     provider: groq
-    model: openai/gpt-oss-20b
+    model: openai/gpt-oss-120b
     # Starting guesses; real limits are learned from 429s and logged in docs/quota.md.
-    rpm: 30
+    rpm: 6
     rpd: 1000
   retry:
     max_attempts: 6
@@ -80,7 +81,9 @@ agent:
   max_investigation_steps: 8
   max_probe_runs: 12
   max_probe_repairs: 2
-  max_requests_per_question: 40
+  max_requests_per_question: 25
+  max_mutation_checks: 12
+  max_tools_per_turn: 3
   ablation:
     no_execution: false        # A1
     no_mutation: false         # A2

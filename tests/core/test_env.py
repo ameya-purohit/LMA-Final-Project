@@ -3,6 +3,12 @@ import pytest
 from core import env
 
 
+@pytest.fixture(autouse=True)
+def no_dotenv(monkeypatch):
+    """These tests set keys themselves; never read (or mark as read) the real .env."""
+    monkeypatch.setattr(env, "load_env", lambda path=None: None)
+
+
 def test_key_present_and_require(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "  value  ")
     assert env.key_present("GEMINI_API_KEY")

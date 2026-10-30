@@ -180,7 +180,7 @@ to explain every file in this bundle.
 
 
 def build(member: str, name: str, since: str | None = None, out_dir: Path | None = None,
-          root: Path = REPO_ROOT) -> Path:
+          root: Path = REPO_ROOT, also: list[str] | None = None) -> Path:
     ownership = load_ownership(root / "bundles" / "ownership.yaml")
     if member not in ownership["members"]:
         raise SystemExit(f"unknown member {member!r}")
@@ -193,7 +193,9 @@ def build(member: str, name: str, since: str | None = None, out_dir: Path | None
         changed, gone = changed_since(since, root)
         files = [f for f in files if f in changed]
         deleted = sorted(f for f in gone if owner_of(f, ownership) == member)
-    mine = [f for f in files if owner_of(f, ownership) == member]
+    # `also`: a file another member owns, when this bundle would otherwise break `main` until theirs lands.
+    # Their bundle holds the identical file, so it shows no change when they merge.
+    mine = sorted({f for f in files if owner_of(f, ownership) == member} | set(also or []))
     if not mine and not deleted:
         raise SystemExit(f"{name}: no files for {member}")
     out_dir = out_dir or root / "bundles"
@@ -211,6 +213,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--member")
     ap.add_argument("--name", help="bundle name, e.g. sunil_scaffold")
     ap.add_argument("--since", help="git rev; include only files changed since it")
+    ap.add_argument("--also", nargs="*", help="also include these files, owned by another member (see build())")
     ap.add_argument("--check", action="store_true", help="only check that every file has an owner")
     args = ap.parse_args(argv)
     ownership = load_ownership()
@@ -222,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if unowned else 0
     if not (args.member and args.name):
         ap.error("--member and --name are required unless --check")
-    path = build(args.member, args.name, args.since)
+    path = build(args.member, args.name, args.since, also=args.also)
     with zipfile.ZipFile(path) as zf:
         n = len(zf.namelist()) - 1
     print(f"wrote {path.relative_to(REPO_ROOT)} ({n} files + PUSH.md)")

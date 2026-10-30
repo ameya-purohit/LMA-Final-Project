@@ -19,7 +19,14 @@ def own():
     ("tools/mutate.py", "sourav"),
     ("tools/registry.py", "sunil"),
     ("llm/providers/gemini.py", "ameya"),
-    ("data/questions_all.jsonl", "ameya"),
+    ("data/questions_all.jsonl", "aditya"),
+    ("data/mining/fix_pairs.py", "sunil"),
+    ("data/schema.py", "sunil"),
+    ("data/build_gold.py", "aditya"),
+    ("scripts/run_all.py", "sunil"),
+    ("docs/results.md", "sourav"),
+    ("docs/mid_submission_report.md", "sunil"),
+    ("docs/prompt_log.md", "ameya"),
     ("docs/explainers/agent.md", "ameya"),
     ("docs/explainers/retrieval.md", "sunil"),
     ("docs/proposal_v2.md", "sunil"),
@@ -33,6 +40,11 @@ def own():
 ])
 def test_owner_rules(path, owner):
     assert mb.owner_of(path, own()) == owner
+
+
+def test_update_bundle_has_its_own_branch():
+    text = mb.push_md("sunil", "sunil_update_1", ["docs/mid_submission_report.md"], [], own())
+    assert "git checkout -b sunil-foundation-update-1" in text
 
 
 def test_unowned_detected():
@@ -49,7 +61,7 @@ def test_push_order_and_members():
 def test_push_md_has_no_ai_attribution_and_right_steps():
     text = mb.push_md("ameya", "ameya_mid", ["llm/client.py", "tests/llm/test_x.py"], [], own())
     assert "Co-Authored-By" not in text and "Claude" not in text
-    assert "git checkout -b ameya-llm-data-agent" in text
+    assert "git checkout -b ameya-llm-agent" in text
     assert "tests/llm" in text
     assert "Sunil Kumar" in text  # must wait for earlier bundles
     assert "invitations" in text and "-x PUSH.md" in text
@@ -88,6 +100,8 @@ def test_build_in_temp_repo(tmp_path):
     assert sorted(zipfile.ZipFile(z2).namelist()) == ["PUSH.md", "llm/b.py"]
     with pytest.raises(SystemExit):
         mb.build("sourav", "sourav_update_1", since=rev, out_dir=out, root=tmp_path)
+    z3 = mb.build("sunil", "sunil_update_2", out_dir=out, root=tmp_path, also=["llm/b.py"])
+    assert "llm/b.py" in zipfile.ZipFile(z3).namelist()
 
 
 def test_real_repo_fully_owned():

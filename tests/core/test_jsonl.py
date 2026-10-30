@@ -20,3 +20,11 @@ def test_blank_lines_skipped_and_bad_line_reported(tmp_path):
 
 def test_dumps_is_stable():
     assert dumps({"b": 1, "a": 2}) == '{"a":2,"b":1}'
+
+
+def test_lone_surrogates_do_not_crash_writes(tmp_path):
+    """Real test output can hold undecodable bytes (seen while validating a click pair)."""
+    p = tmp_path / "x.jsonl"
+    write_jsonl(p, [{"m": "bad \udcff byte"}])
+    append_jsonl(p, {"m": "bad \udcff byte"})
+    assert len(read_jsonl(p)) == 2

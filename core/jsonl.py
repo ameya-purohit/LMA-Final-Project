@@ -41,7 +41,8 @@ def write_jsonl(path: str | Path, records: Iterable[dict[str, Any]]) -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     count = 0
-    with open(tmp, "w", encoding="utf-8") as fh:
+    # backslashreplace: test output can hold lone surrogates that UTF-8 cannot encode.
+    with open(tmp, "w", encoding="utf-8", errors="backslashreplace") as fh:
         for record in records:
             fh.write(dumps(record) + "\n")
             count += 1
@@ -53,7 +54,7 @@ def append_jsonl(path: str | Path, record: dict[str, Any]) -> None:
     """Append one record and flush, so a crash loses at most the current record."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a", encoding="utf-8") as fh:
+    with open(path, "a", encoding="utf-8", errors="backslashreplace") as fh:
         fh.write(dumps(record) + "\n")
         fh.flush()
 
