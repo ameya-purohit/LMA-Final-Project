@@ -36,6 +36,10 @@ Chain-of-Verification. The method is specified in
 | `eval/`, `analysis/` | Judge, metrics, statistics, tables and figures |
 | `annotation/` | Human spot-check kit for the automatic gold |
 | `docs/explainers/` | One plain-language explainer per component, with viva Q&A |
+| `multiagent/` | Extension: the five-role orchestrator (E1-E6) and its prompts |
+| `codegraph/`, `retrieval/hybrid.py` | Extension: call graph, dependences, slicing; BM25 + dense + RRF + reranking |
+| `experiments/` | Extension: three-way mutation verdicts, pairwise checks, information-gain selection |
+| `mcp_server/` | Extension: optional local MCP server and client for the analysis and execution tools |
 
 ## Replicating the project, step by step
 
@@ -123,14 +127,104 @@ python -m analysis.toylib_ablations
 # Sanity check: one live run on toylib
 python scripts/live_toylib.py --systems ours b0 b1 b2
 
-# Experiments on the dev set: run, judge, report
-python scripts/run_all.py --by-question --limit 20 --systems ours b2 a2 a3 a1 --split dev --run-id mid
-python -m eval.report --run-id mid --split dev
+# Experiments on the dev set (pilot): run, judge, report
+python scripts/run_all.py --by-question --limit 20 --systems ours b2 b1 a2 a3 a1 --split dev --run-id pilot_d51
+python -m eval.report --run-id pilot_d51 --split dev
 ```
 
 Exit code 3 from `run_all.py` means the free daily quota ran out. Finished answers are saved: run the same command
-after the reset (midnight Pacific time) to continue. The test set is locked: `eval.run` refuses it without
-`--allow-test`, which must not be used before gate G2. Progress is tracked in [docs/progress.md](docs/progress.md).
+after the reset (midnight Pacific time) to continue. Progress is tracked in [docs/progress.md](docs/progress.md).
+
+### 8. Reproduce the final results (test set)
+
+The test set is locked (`PREREGISTRATION.md`, status LOCKED, with the test file's SHA-256). `eval.run` refuses it
+unless that file is LOCKED and `--allow-test` is passed. Each command runs, then judges, then reports.
+
+```bash
+# Must-have tier: ours, B1, B2 and ablations A1-A3 on all 150 test questions (run id `main`)
+python scripts/run_all.py --by-question --limit 150 --systems ours b2 b1 a2 a3 a1 --split test --allow-test --run-id main
+
+# Closed-book baseline B0 on the same questions
+python scripts/run_all.py --by-question --limit 150 --systems b0 --split test --allow-test --run-id main
+
+# A10 retrieval ablation (none / oracle) with ours and B2 on the first 50 test questions (run id `sub50`)
+python scripts/run_all.py --by-question --limit 50 --systems ours b2 a10none a10oracle --split test --allow-test --run-id sub50
+
+# Adversarial set (15 planted prompt injections built from dev questions; run id `adv`)
+python data/adversarial.py
+python scripts/run_all.py --by-question --limit 15 --systems ours b2 b1 --split adversarial --run-id adv --no-judge
+python -m analysis.adversarial --run-id adv
+
+# Gate G1, spot check: apply the members' verdicts (annotation/spotcheck_<member>_done.jsonl)
+python annotation/apply_spotcheck.py
+
+# Gate G3, human labels: export the blinded sample, label it in eval/label.html, then compute kappa
+python -m eval.human_export --run-id main --split test
+python -m eval.kappa --run-id main
+
+# Every table and figure (hypotheses, ablations, RQ2, tool use, failure taxonomy, kappa rule)
+python -m analysis.make_all --run-id main --split test
+python -m analysis.make_all --run-id sub50 --split test
+```
+
+On our machine the must-have tier took three free-tier quota days (four members' Gemini keys, about 500 requests
+per key per day). With the SQLite cache in `.cache/llm.sqlite`, re-running any command replays cached replies at no
+quota cost; without it, expect fresh API calls and small differences, because temperature 0 is not fully
+deterministic.
+
+### 9. Exploratory extension: multi-agent localization (E1-E6)
+
+Added after the main results, pre-registered separately (PREREGISTRATION.md, "Exploratory extension"); see
+[docs/extension_results.md](docs/extension_results.md). It needs the optional dependencies (small local embedding and
+reranking models are downloaded on first use, about 150 MB):
+
+```bash
+pip install -e ".[extension]"         # networkx, fastembed, faiss-cpu, mcp<2
+
+# Retrieval study R1-R5 on all test questions (no LLM, no quota)
+python -m analysis.retrieval_study --split test
+
+# E1-E6 on the 47 sub50 test questions (data/ext_qids.txt); run E1-E5 in order so E4-E6 reuse the cache
+for s in e1 e2 e3 e4 e5 e6; do
+  python -m eval.run --system $s --split test --allow-test --run-id ext --qids-file data/ext_qids.txt
+done
+python -m eval.judge --run-id ext --split test --system e1     # optional: correctness, same judge as the study
+
+# Localization, causal-verification and cost tables vs E0 (ours) and B2
+python -m analysis.extension --run-id ext
+```
+
+## Presentation demo
+
+A Streamlit app shows the idea, a live probe and mutation check on the planted toylib library, all results as charts,
+and one question's answers and decision log side by side. It makes no LLM calls and uses no API quota.
+
+```bash
+pip install -r demo/requirements.txt
+streamlit run demo/app.py        # http://localhost:8501 ; add ?page=live (or idea, results, question)
+```
+
+See [demo/README.md](demo/README.md) for what each page needs and a 5-minute demo script.
+
+## Results
+
+The full write-up is [docs/final_report.md](docs/final_report.md); the detailed numbers are in
+[docs/results.md](docs/results.md), generated from `results/summary/analysis_main_test/report.md`. In short, on the
+145 test questions left after the spot check, the full procedure **did not beat** the ReAct agent with the same tools
+(causally-supported answers: ours 40.0% vs B2 49.7% by the judge; 25.0% vs 41.7% on the 12 human-labelled questions,
+which the pre-registered kappa rule makes primary), and the mutation check made citations worse in the humans'
+eyes (H3 not supported). Committed summaries:
+
+| Path | What |
+|---|---|
+| `results/summary/analysis_main_test/` | Main analysis report, JSON and figures |
+| `results/summary/analysis_sub50_test/` | A10 retrieval ablation |
+| `results/summary/analysis_adv/` | Adversarial set |
+| `results/summary/extension.md`, `retrieval_study.md` | Exploratory multi-agent extension and retrieval study |
+| `results/summary/human/` | G3 agreement (kappa) |
+| `data/mining_report.md` | Dataset funnel and the spot-check results |
+
+Raw answers, traces and the LLM cache are not committed (they are large, and traces contain full prompts).
 
 ## How code reaches GitHub
 

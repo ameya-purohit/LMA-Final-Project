@@ -22,7 +22,7 @@ def detect_source_root(tree: Path, package: str) -> str:
 
 
 class Workspace:
-    __slots__ = ("library", "package", "tree", "repo", "commit", "tests_dir", "source_root", "config",
+    __slots__ = ("library", "package", "tree", "repo", "commit", "variant", "tests_dir", "source_root", "config",
                  "_index", "_session", "_session_factory")
 
     FORBIDDEN = ("fail_to_pass", "gold_answer", "gold_evidence", "observed_before", "observed_after",
@@ -30,12 +30,13 @@ class Workspace:
 
     def __init__(self, library: str, package: str, tree: str | Path, *, repo: str | Path | None = None,
                  commit: str | None = None, tests_dir: str = "tests", config: dict[str, Any] | None = None,
-                 session_factory: Callable[["Workspace"], Any] | None = None):
+                 session_factory: Callable[["Workspace"], Any] | None = None, variant: str | None = None):
         self.library = library
         self.package = package
         self.tree = Path(tree).resolve()
         self.repo = Path(repo) if repo else None
         self.commit = commit
+        self.variant = variant
         self.tests_dir = tests_dir
         self.source_root = detect_source_root(self.tree, package)
         self.config = config or {}
@@ -46,17 +47,23 @@ class Workspace:
     @classmethod
     def for_question(cls, question: dict[str, Any], config: dict[str, Any],
                      session_factory: Callable[["Workspace"], Any] | None = None) -> "Workspace":
-        """Reads only `library` and `frozen_commit` from the question record."""
+        """Reads only `library`, `frozen_commit` and the optional `tree_variant` from the question record.
+
+        A variant is a modified copy of the frozen tree (the adversarial set plants text in one; `data/adversarial.py`).
+        git history still comes from the real commit."""
         lib = question["library"]
         commit = question["frozen_commit"]
+        variant = question.get("tree_variant")
         spec = config["data"]["libraries"][lib]
-        tree = REPO_ROOT / config["paths"]["trees_dir"] / lib / commit
+        tree = REPO_ROOT / config["paths"]["trees_dir"] / lib / (f"{commit}+{variant}" if variant else commit)
+        if variant and not tree.is_dir():
+            raise FileNotFoundError(f"variant tree {tree} is missing; build it with python -m data.adversarial")
         repo = REPO_ROOT / config["paths"]["repos_dir"] / f"{lib}.git"
         if not tree.is_dir():
             from data.freeze import export_tree
             export_tree(repo, commit, tree)
         return cls(lib, spec["package"], tree, repo=repo, commit=commit, tests_dir=spec["tests_dir"], config=config,
-                   session_factory=session_factory)
+                   session_factory=session_factory, variant=variant)
 
     @property
     def index(self):
@@ -64,7 +71,8 @@ class Workspace:
             from retrieval.index import load_or_build
             cache = None
             if self.commit and self.config.get("paths"):
-                cache = REPO_ROOT / self.config["paths"]["index_dir"] / self.library / f"{self.commit}.pkl"
+                key = f"{self.commit}+{self.variant}" if self.variant else self.commit
+                cache = REPO_ROOT / self.config["paths"]["index_dir"] / self.library / f"{key}.pkl"
             self._index = load_or_build(self.tree, self.package, self.source_root, cache)
         return self._index
 

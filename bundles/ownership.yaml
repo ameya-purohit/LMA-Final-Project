@@ -44,6 +44,21 @@ rules:
   - {pattern: "docs/explainers/analysis.md", owner: sourav}
   - {pattern: "docs/results.md", owner: sourav}
   - {pattern: "scripts/smoke_llm.py", owner: ameya}
+  # Exploratory multi-agent extension (2026-11-12): each part goes to the member whose area it extends.
+  - {pattern: "docs/explainers/multiagent.md", owner: ameya}
+  - {pattern: "docs/explainers/mcp.md", owner: aditya}
+  - {pattern: "docs/explainers/experiments.md", owner: sourav}
+  - {pattern: "docs/explainers/extension_eval.md", owner: sourav}
+  - {pattern: "docs/extension_results.md", owner: sourav}
+  - {pattern: "data/ext_qids.txt", owner: sourav}
+  - {pattern: "multiagent/**", owner: ameya}
+  - {pattern: "tests/multiagent/**", owner: ameya}
+  - {pattern: "mcp_server/**", owner: aditya}
+  - {pattern: "tests/mcp_server/**", owner: aditya}
+  - {pattern: "experiments/**", owner: sourav}
+  - {pattern: "tests/experiments/**", owner: sourav}
+  - {pattern: "codegraph/**", owner: sunil}
+  - {pattern: "tests/codegraph/**", owner: sunil}
 
   # --- Ameya: LLM layer, the agent, the pilot ------------------------------
   - {pattern: "llm/**", owner: ameya}
@@ -74,6 +89,11 @@ rules:
   - {pattern: "results/**", owner: sourav}
   - {pattern: "tests/eval/**", owner: sourav}
   - {pattern: "tests/analysis/**", owner: sourav}
+  - {pattern: "tests/adversarial/**", owner: sourav}
+  - {pattern: "demo/**", owner: sourav}
+  - {pattern: "tests/demo/**", owner: sourav}
+  - {pattern: ".streamlit/**", owner: sourav}
+  - {pattern: "docs/explainers/demo.md", owner: sourav}
 
   # --- Sunil: foundation, data mining, retrieval, tools, pipeline scripts --
   - {pattern: "pyproject.toml", owner: sunil}

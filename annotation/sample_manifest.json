@@ -1,0 +1,51 @@
+{
+ "input": "questions_all.jsonl",
+ "questions": 170,
+ "fraction": 0.2,
+ "seed": 82,
+ "sampled": 34,
+ "assignment": {
+  "sunil": [
+   "click-1125",
+   "click-1548",
+   "click-2332",
+   "click-2697",
+   "click-2746",
+   "click-2983",
+   "click-3145",
+   "click-3822",
+   "marshmallow-1497"
+  ],
+  "ameya": [
+   "click-1138",
+   "click-1287",
+   "click-1359",
+   "click-1648",
+   "click-1844",
+   "click-1978",
+   "click-2099",
+   "marshmallow-2227",
+   "marshmallow-2869"
+  ],
+  "aditya": [
+   "click-1178",
+   "click-1253",
+   "click-1339",
+   "click-1376",
+   "click-2001",
+   "click-2500",
+   "click-3449",
+   "marshmallow-2170"
+  ],
+  "sourav": [
+   "click-1075",
+   "click-1285",
+   "click-1969",
+   "click-2131",
+   "click-2396",
+   "click-3107",
+   "click-395",
+   "marshmallow-2924"
+  ]
+ }
+}

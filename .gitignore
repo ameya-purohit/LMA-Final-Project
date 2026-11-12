@@ -18,6 +18,8 @@ data/repos/
 # Raw per-question results and traces; summaries under results/summary/ are committed
 results/*/
 !results/summary/
+results/*.log
+results/*.out
 
 # Bundles are built locally and pushed by each member, never committed
 bundles/*.zip

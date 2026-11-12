@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spot check: automatic gold (gate G1)</title>
+<!--
+  Self-contained: no server, no network, no external files. Open it straight from disk.
+  Humans CHECK the automatically built gold here; they never write it (CLAUDE.md §6.10).
+  All text from the dataset (issue bodies, diffs, test output) is shown with textContent,
+  never innerHTML: it is data, not markup.
+-->
+<style>
+  :root { --bg:#fafafa; --card:#fff; --ink:#1d1d1f; --muted:#666; --line:#ddd; --add:#e6ffec; --del:#ffebe9;
+          --hunk:#ddf4ff; --yes:#1a7f37; --no:#cf222e; --accent:#0969da; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line);
+           padding:10px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0 12px 0 0; }
+  #status { color:var(--muted); }
+  #status.done { color:var(--yes); font-weight:600; }
+  main { max-width:1100px; margin:0 auto; padding:16px 20px 80px; }
+  .intro { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; margin:18px 0; padding:14px 18px; }
+  .card.complete { border-left:5px solid var(--yes); }
+  .card h2 { font-size:16px; margin:0 0 4px; }
+  .meta { color:var(--muted); font-size:13px; margin-bottom:8px; }
+  .meta a, .links a { color:var(--accent); }
+  h3 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:14px 0 4px; }
+  pre { margin:0; white-space:pre-wrap; word-break:break-word; font:12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+  .issue { background:#f6f8fa; border:1px solid var(--line); border-radius:6px; padding:8px 10px; max-height:320px; overflow:auto; }
+  .diff { border:1px solid var(--line); border-radius:6px; max-height:420px; overflow:auto; }
+  .diff div { padding:0 8px; white-space:pre-wrap; word-break:break-word; font:12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+  .diff .add { background:var(--add); } .diff .del { background:var(--del); } .diff .hunk { background:var(--hunk); color:#555; }
+  .diff .file { background:#eee; font-weight:600; }
+  .fail { background:var(--del); border-radius:6px; padding:6px 10px; margin:4px 0; }
+  .links li { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13px; }
+  .q { border-top:1px dashed var(--line); padding:10px 0 2px; }
+  .q p { margin:0 0 6px; font-weight:600; }
+  .q label { margin-right:14px; cursor:pointer; }
+  .q input[type=text] { width:100%; margin-top:6px; padding:5px 8px; border:1px solid var(--line); border-radius:5px; font:inherit; }
+  button, .file-btn { font:inherit; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:#f6f8fa; cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button:disabled { opacity:.5; cursor:default; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Spot check (G1)</h1>
+  <label class="file-btn">Open my file…
+    <input id="file" type="file" accept=".jsonl,.json,.txt" class="hidden">
+  </label>
+  <span id="status">No file loaded.</span>
+  <button id="export" class="primary" disabled>Export verdicts</button>
+  <button id="clear" disabled>Clear my draft</button>
+</header>
+<main>
+  <div class="intro">
+    <p><b>How to use.</b> Open <code>annotation/spotcheck_&lt;your name&gt;.jsonl</code>. For each question, read the issue,
+      the failing test's message and the fix, then answer the three questions. Your answers are saved in this browser as
+      you go, so you can close the page and come back. When every question is answered, click <b>Export verdicts</b>; it
+      downloads <code>spotcheck_&lt;your name&gt;_done.jsonl</code>. Put that file in the <code>annotation/</code> folder,
+      or send it to the operator. The guide is <code>docs/annotation_guide.md</code>.</p>
+    <p>You are checking the <b>automatic gold</b>: whether this issue, this failing test and these lines make a fair
+      question and answer key. You are not judging any AI system.</p>
+  </div>
+  <div id="cards"></div>
+</main>
+
+<!-- Pure logic: no DOM access, so it can be tested outside a browser (tests/annotation). -->
+<script id="logic">
+const QUESTIONS = [
+  { key: "genuine_question", text: "1. Is the issue a genuine question about how the library behaves?" },
+  { key: "test_captures_behaviour", text: "2. Does the failing test capture the behaviour the issue asks about?" },
+  { key: "gold_lines_decide", text: "3. Do the gold lines decide that behaviour?" },
+];
+
+function parseJsonl(text) {
+  const rows = [];
+  text.split(/\r?\n/).forEach((line, i) => {
+    if (!line.trim()) return;
+    try { rows.push(JSON.parse(line)); }
+    catch (e) { throw new Error("line " + (i + 1) + " is not valid JSON"); }
+  });
+  if (!rows.length) throw new Error("the file has no questions");
+  const member = rows[0].member;
+  for (const r of rows) {
+    if (!r.qid || !r.member) throw new Error("a row has no qid or member: is this a spotcheck_<name>.jsonl file?");
+    if (r.member !== member) throw new Error("the file mixes members " + member + " and " + r.member);
+  }
+  return rows;
+}
+
+function isComplete(answer) {
+  return !!answer && QUESTIONS.every(q => answer[q.key] === true || answer[q.key] === false);
+}
+
+// One verdict per question, in the shape annotation/apply_spotcheck.py validates.
+function verdictRecord(row, answer, nowIso) {
+  const rec = { qid: row.qid, member: row.member, library: row.library };
+  for (const q of QUESTIONS) {
+    rec[q.key] = answer[q.key];
+    rec[q.key + "_note"] = (answer[q.key + "_note"] || "").trim();
+  }
+  rec.valid = QUESTIONS.every(q => answer[q.key] === true);
+  rec.checked_at = nowIso;
+  return rec;
+}
+
+function toJsonl(rows, answers, nowIso) {
+  return rows.filter(r => isComplete(answers[r.qid]))
+             .map(r => JSON.stringify(verdictRecord(r, answers[r.qid], nowIso))).join("\n") + "\n";
+}
+
+function diffLineClass(line) {
+  if (line.startsWith("diff --git") || line.startsWith("+++") || line.startsWith("---") || line.startsWith("index ")) return "file";
+  if (line.startsWith("@@")) return "hunk";
+  if (line.startsWith("+")) return "add";
+  if (line.startsWith("-")) return "del";
+  return "";
+}
+
+if (typeof module !== "undefined") module.exports = { QUESTIONS, parseJsonl, isComplete, verdictRecord, toJsonl, diffLineClass };
+</script>
+
+<!-- User interface. -->
+<script>
+(function () {
+  let rows = [], answers = {}, member = null;
+  const $ = id => document.getElementById(id);
+  const storageKey = () => "spotcheck:" + member;
+
+  function el(tag, attrs, text) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+    if (text !== undefined) e.textContent = text;  // always text, never markup
+    return e;
+  }
+  function link(href, text) {
+    const a = el("a", { href: href, target: "_blank", rel: "noopener noreferrer" }, text);
+    return a;
+  }
+  function save() { try { localStorage.setItem(storageKey(), JSON.stringify(answers)); } catch (e) { /* private mode */ } }
+  function load() { try { return JSON.parse(localStorage.getItem(storageKey()) || "{}"); } catch (e) { return {}; } }
+
+  function updateStatus() {
+    const done = rows.filter(r => isComplete(answers[r.qid])).length;
+    const s = $("status");
+    s.textContent = member + ": " + done + " of " + rows.length + " answered" + (done === rows.length ? " ✓ ready to export" : "");
+    s.className = done === rows.length ? "done" : "";
+    $("export").disabled = done === 0;
+    rows.forEach(r => { const c = $("card-" + r.qid); if (c) c.classList.toggle("complete", isComplete(answers[r.qid])); });
+  }
+
+  function card(r) {
+    const c = el("section", { class: "card", id: "card-" + r.qid });
+    c.appendChild(el("h2", {}, r.qid));
+    const meta = el("div", { class: "meta" });
+    meta.append(r.library + " · " + r.category + " · ", link(r.issue_url, "issue"), " · ",
+                link(r.fix_pr_url, "fix PR #" + r.fix_pr_number));
+    c.appendChild(meta);
+
+    c.appendChild(el("h3", {}, "The issue (title and opening post only)"));
+    const issue = el("div", { class: "issue" }); issue.appendChild(el("pre", {}, r.question_text)); c.appendChild(issue);
+
+    c.appendChild(el("h3", {}, "Failing test on the frozen code (before the fix)"));
+    (r.observed_before || []).forEach(o => {
+      const f = el("div", { class: "fail" });
+      f.appendChild(el("pre", {}, o.test + "  [" + o.status + "]\n" + (o.message || "(no message)")));
+      c.appendChild(f);
+    });
+
+    c.appendChild(el("h3", {}, "Gold lines (frozen commit; opens GitHub)"));
+    const ul = el("ul", { class: "links" });
+    (r.gold_evidence || []).forEach(g => {
+      const li = el("li");
+      const span = g.line_start === g.line_end ? "L" + g.line_start : "L" + g.line_start + "–" + g.line_end;
+      li.append(link(g.url, g.path + " " + span), " (" + g.kind + ")");
+      ul.appendChild(li);
+    });
+    c.appendChild(ul);
+
+    c.appendChild(el("h3", {}, "The fix: source part of the diff"));
+    const d = el("div", { class: "diff" });
+    (r.source_diff || "").split("\n").forEach(line => d.appendChild(el("div", { class: diffLineClass(line) }, line || " ")));
+    c.appendChild(d);
+
+    c.appendChild(el("h3", {}, "Gold answer (filled from a template)"));
+    c.appendChild(el("pre", {}, r.gold_answer));
+
+    const a = answers[r.qid] = answers[r.qid] || {};
+    QUESTIONS.forEach(q => {
+      const box = el("div", { class: "q" });
+      box.appendChild(el("p", {}, q.text));
+      ["yes", "no"].forEach(v => {
+        const lab = el("label");
+        const inp = el("input", { type: "radio", name: r.qid + ":" + q.key, value: v });
+        if (a[q.key] === (v === "yes")) inp.checked = true;
+        inp.addEventListener("change", () => { a[q.key] = (v === "yes"); save(); updateStatus(); });
+        lab.append(inp, " " + v);
+        box.appendChild(lab);
+      });
+      const note = el("input", { type: "text", placeholder: "Note (optional; if you answer no, please say why)" });
+      note.value = a[q.key + "_note"] || "";
+      note.addEventListener("input", () => { a[q.key + "_note"] = note.value; save(); });
+      box.appendChild(note);
+      c.appendChild(box);
+    });
+    return c;
+  }
+
+  function show(text) {
+    try { rows = parseJsonl(text); }
+    catch (e) { alert("Could not load the file: " + e.message); return; }
+    member = rows[0].member;
+    answers = load();
+    const cards = $("cards"); cards.replaceChildren();
+    rows.forEach(r => cards.appendChild(card(r)));
+    $("clear").disabled = false;
+    updateStatus();
+  }
+
+  $("file").addEventListener("change", ev => {
+    const f = ev.target.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => show(String(reader.result));
+    reader.readAsText(f, "utf-8");
+  });
+
+  $("export").addEventListener("click", () => {
+    const done = rows.filter(r => isComplete(answers[r.qid])).length;
+    if (done < rows.length && !confirm(done + " of " + rows.length + " answered. Export only the answered ones?")) return;
+    const blob = new Blob([toJsonl(rows, answers, new Date().toISOString())], { type: "application/x-ndjson" });
+    const a = el("a", { href: URL.createObjectURL(blob), download: "spotcheck_" + member + "_done.jsonl" });
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  $("clear").addEventListener("click", () => {
+    if (!confirm("Delete every answer saved in this browser for " + member + "?")) return;
+    try { localStorage.removeItem(storageKey()); } catch (e) {}
+    answers = {}; $("cards").replaceChildren(); rows.forEach(r => $("cards").appendChild(card(r))); updateStatus();
+  });
+
+  window.__spotcheck = { show: show };  // used by the headless render test only
+})();
+</script>
+</body>
+</html>
