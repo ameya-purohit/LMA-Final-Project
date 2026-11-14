@@ -13,10 +13,11 @@ Cutoff: merged on or after 2020-01-01; at most 10 source files per PR.
 | merged since cutoff | 801 | 605 | 1406 |
 | linked to an issue | 286 | 81 | 367 |
 | issue not by a bot | 286 | 81 | 367 |
-| changes source AND tests | 180 | 39 | 219 |
-| at most N source files (candidates) | 180 | 39 | 219 |
-| validated: test fails before, passes after | 153 | 29 | 182 |
-| gold built, unique issue (questions) | 147 | 29 | 176 |
+| issue not a feature request | 284 | 75 | 359 |
+| changes source AND tests | 179 | 33 | 212 |
+| at most N source files (candidates) | 179 | 33 | 212 |
+| validated: test fails before, passes after | 152 | 24 | 176 |
+| gold built, unique issue (questions) | 146 | 24 | 170 |
 
 ## Drop reasons
 
@@ -24,11 +25,12 @@ Cutoff: merged on or after 2020-01-01; at most 10 source files per PR.
 |---|---|---|---|---|
 | gold | duplicate_issue_later_fix | 3 | 0 | 3 |
 | gold | question_text_names_the_fix_pr | 3 | 0 | 3 |
+| mining | feature_request | 2 | 6 | 8 |
 | mining | no_linked_issue | 515 | 524 | 1039 |
-| mining | no_source_change | 48 | 17 | 65 |
+| mining | no_source_change | 47 | 17 | 64 |
 | mining | no_test_change | 58 | 25 | 83 |
 | validation | fail_to_pass_test_not_passing_after_fix | 7 | 0 | 7 |
-| validation | no_test_fails_before_fix | 15 | 8 | 23 |
+| validation | no_test_fails_before_fix | 15 | 7 | 22 |
 | validation | sandbox_failure | 1 | 0 | 1 |
 | validation | test_error_with_fix_applied | 0 | 2 | 2 |
 | validation | timeout | 4 | 0 | 4 |
@@ -37,6 +39,29 @@ Cutoff: merged on or after 2020-01-01; at most 10 source files per PR.
 
 | Library | doc_related | spread_across_files | single_location | total |
 |---|---|---|---|---|
-| click | 90 | 4 | 53 | 147 |
-| marshmallow | 18 | 0 | 11 | 29 |
-| total | 108 | 4 | 64 | 176 |
+| click | 89 | 4 | 53 | 146 |
+| marshmallow | 14 | 0 | 10 | 24 |
+| total | 103 | 4 | 63 | 170 |
+
+## Spot check (gate G1)
+
+Written by `annotation/apply_spotcheck.py` from the members' verdicts. One member checked each sampled question; disagreement means the member answered no to a check of the automatic gold.
+
+- Checked: 34; marked invalid and removed: 8 (overall disagreement rate 23.5%).
+
+| Check | Rate of no |
+|---|---|
+| genuine_question | 0.0% |
+| test_captures_behaviour | 23.5% |
+| gold_lines_decide | 0.0% |
+
+| Question | Checked by | Share of checks failed | Reason |
+|---|---|---|---|
+| click-1844 | ameya | 33% | test_captures_behaviour: no (the failing test is tests/test_utils.py::test_filename_formatting about surrogate-escape handling of filenames ('foo\udcff.txt' vs 'foo\ufffd.txt'). It does not reproduce the AttributeError the issue is about. Looks like the fix PR bundled several changes and the picked fail-to-pass is from an unrelated one.) |
+| click-2396 | sourav | 33% | test_captures_behaviour: no (feature request for a new UserWarning. 'DID NOT WARN' on the frozen code only proves the warning is new; it does not show any existing bug. Worked-example-2 shape.) |
+| click-2983 | sunil | 33% | test_captures_behaviour: no (pure feature request. 'Parameter.__init__() got an unexpected keyword argument help' is the worked-example-2 pattern: it proves the kwarg is new, not any current behaviour.) |
+| click-3107 | sourav | 33% | test_captures_behaviour: no (clearly a feature request. The tests check for the new 'Did you mean' / 'Possible options' text in the output, which the frozen code cannot emit. test_unknown_options also tests a new error-text format. On frozen these all fail because the new feature is not there, not because of a current bug.) |
+| click-3822 | sunil | 33% | test_captures_behaviour: no (feature request. TypeError 'click.types.Path is not a generic class' at runtime only proves Path was not declared Generic yet; it is the missing-symbol / class-not-generic pattern from example 2.) |
+| click-395 | sourav | 33% | test_captures_behaviour: no (pure feature request for a new temp_dir kwarg. The TypeError 'got an unexpected keyword argument temp_dir' is the worked-example-2 pattern: it proves the kwarg is new, not any behaviour.) |
+| marshmallow-2227 | ameya | 33% | test_captures_behaviour: no (feature request: the fix adds a DeprecationWarning that did not exist before. 'DID NOT WARN' only proves the new warning is new, not any current bug. Same shape as the worked example 2.) |
+| marshmallow-2924 | sourav | 33% | test_captures_behaviour: no (feature request: 'DID NOT RAISE TypeError' only proves the abstract-check is new. It does not show a behavioural bug on the frozen code.) |

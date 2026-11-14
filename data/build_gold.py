@@ -144,7 +144,8 @@ def build_question(v: dict[str, Any], config: dict[str, Any]) -> dict[str, Any] 
 
 FUNNEL = [("closed_prs", "closed PRs listed"), ("merged_prs_all_time", "merged, any date"),
           ("merged_prs", "merged since cutoff"), ("linked_issue", "linked to an issue"),
-          ("issue_not_bot", "issue not by a bot"), ("source_and_test", "changes source AND tests"),
+          ("issue_not_bot", "issue not by a bot"), ("issue_not_feature", "issue not a feature request"),
+          ("source_and_test", "changes source AND tests"),
           ("candidates", "at most N source files (candidates)")]
 
 
@@ -188,7 +189,11 @@ def main() -> int:
     cfg = load_config()
     cache = REPO_ROOT / cfg["paths"]["cache_dir"]
     mined = json.loads((cache / "candidates.json").read_text(encoding="utf-8"))
-    validation = read_jsonl(cache / "validation.jsonl")
+    # Validation ran on an earlier candidate list. Keep only rows for current candidates, so a pair that a
+    # later mining filter dropped (for example a feature request, D-43) cannot come back; its drop is
+    # already logged at the mining stage.
+    current = {(p["library"], p["pr_number"]) for p in mined["pairs"]}
+    validation = [r for r in read_jsonl(cache / "validation.jsonl") if (r["library"], r["pr"]) in current]
     dropped = list(mined["dropped"]) + [{k: r.get(k) for k in ("library", "pr", "issue", "stage", "reason", "detail")}
                                         for r in validation if not r.get("valid")]
     questions: list[dict[str, Any]] = []

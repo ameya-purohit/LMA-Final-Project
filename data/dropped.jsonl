@@ -61,6 +61,7 @@
 {"library":"click","pr":3510,"reason":"no_linked_issue","stage":"mining"}
 {"library":"click","pr":3509,"reason":"no_linked_issue","stage":"mining"}
 {"library":"click","pr":3508,"reason":"no_linked_issue","stage":"mining"}
+{"issue":3059,"library":"click","pr":3507,"reason":"feature_request","stage":"mining"}
 {"issue":3489,"library":"click","pr":3503,"reason":"no_source_change","stage":"mining"}
 {"library":"click","pr":3500,"reason":"no_linked_issue","stage":"mining"}
 {"library":"click","pr":3498,"reason":"no_linked_issue","stage":"mining"}
@@ -70,7 +71,7 @@
 {"library":"click","pr":3483,"reason":"no_linked_issue","stage":"mining"}
 {"library":"click","pr":3479,"reason":"no_linked_issue","stage":"mining"}
 {"issue":2994,"library":"click","pr":3478,"reason":"no_test_change","stage":"mining"}
-{"issue":3081,"library":"click","pr":3472,"reason":"no_source_change","stage":"mining"}
+{"issue":3081,"library":"click","pr":3472,"reason":"feature_request","stage":"mining"}
 {"library":"click","pr":3469,"reason":"no_linked_issue","stage":"mining"}
 {"library":"click","pr":3467,"reason":"no_linked_issue","stage":"mining"}
 {"library":"click","pr":3463,"reason":"no_linked_issue","stage":"mining"}
@@ -668,6 +669,7 @@
 {"library":"marshmallow","pr":2931,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2930,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2929,"reason":"no_linked_issue","stage":"mining"}
+{"issue":2821,"library":"marshmallow","pr":2928,"reason":"feature_request","stage":"mining"}
 {"library":"marshmallow","pr":2926,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2919,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2914,"reason":"no_linked_issue","stage":"mining"}
@@ -787,6 +789,7 @@
 {"library":"marshmallow","pr":2733,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2732,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2731,"reason":"no_linked_issue","stage":"mining"}
+{"issue":1415,"library":"marshmallow","pr":2730,"reason":"feature_request","stage":"mining"}
 {"library":"marshmallow","pr":2729,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2728,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2727,"reason":"no_linked_issue","stage":"mining"}
@@ -852,6 +855,7 @@
 {"library":"marshmallow","pr":2277,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2276,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2272,"reason":"no_linked_issue","stage":"mining"}
+{"issue":2270,"library":"marshmallow","pr":2271,"reason":"feature_request","stage":"mining"}
 {"library":"marshmallow","pr":2269,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2267,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":2265,"reason":"no_linked_issue","stage":"mining"}
@@ -1092,6 +1096,7 @@
 {"library":"marshmallow","pr":1783,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1782,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1780,"reason":"no_linked_issue","stage":"mining"}
+{"issue":1768,"library":"marshmallow","pr":1777,"reason":"feature_request","stage":"mining"}
 {"library":"marshmallow","pr":1776,"reason":"no_linked_issue","stage":"mining"}
 {"issue":1458,"library":"marshmallow","pr":1774,"reason":"no_source_change","stage":"mining"}
 {"library":"marshmallow","pr":1772,"reason":"no_linked_issue","stage":"mining"}
@@ -1102,6 +1107,7 @@
 {"library":"marshmallow","pr":1757,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1752,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1742,"reason":"no_linked_issue","stage":"mining"}
+{"issue":1733,"library":"marshmallow","pr":1735,"reason":"feature_request","stage":"mining"}
 {"issue":1728,"library":"marshmallow","pr":1729,"reason":"no_test_change","stage":"mining"}
 {"library":"marshmallow","pr":1727,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1719,"reason":"no_linked_issue","stage":"mining"}
@@ -1117,6 +1123,7 @@
 {"library":"marshmallow","pr":1687,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1686,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1685,"reason":"no_linked_issue","stage":"mining"}
+{"issue":686,"library":"marshmallow","pr":1682,"reason":"feature_request","stage":"mining"}
 {"library":"marshmallow","pr":1680,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1678,"reason":"no_linked_issue","stage":"mining"}
 {"library":"marshmallow","pr":1675,"reason":"no_linked_issue","stage":"mining"}
@@ -1220,7 +1227,6 @@
 {"detail":null,"issue":2133,"library":"marshmallow","pr":2264,"reason":"no_test_fails_before_fix","stage":"validation"}
 {"detail":"tests/mypy_test_cases/test_validation_error.py:20: in <module>\n    d: dict = err.messages_dict\nsrc/marshmallow/exceptions.py:53: in messages_dict\n    raise TypeError(\nE   TypeError: cannot access 'messages_dict' when 'messages' is of type list","issue":1442,"library":"marshmallow","pr":1976,"reason":"test_error_with_fix_applied","stage":"validation"}
 {"detail":null,"issue":1856,"library":"marshmallow","pr":1863,"reason":"no_test_fails_before_fix","stage":"validation"}
-{"detail":null,"issue":1733,"library":"marshmallow","pr":1735,"reason":"no_test_fails_before_fix","stage":"validation"}
 {"detail":"job exceeded 120s; container restarted","issue":2899,"library":"click","pr":3499,"reason":"timeout","stage":"validation"}
 {"issue":2246,"library":"click","pr":2550,"reason":"duplicate_issue_later_fix","stage":"gold"}
 {"issue":2516,"library":"click","pr":2517,"reason":"question_text_names_the_fix_pr","stage":"gold"}
@@ -1228,3 +1234,11 @@
 {"issue":2865,"library":"click","pr":3391,"reason":"duplicate_issue_later_fix","stage":"gold"}
 {"issue":3043,"library":"click","pr":3504,"reason":"duplicate_issue_later_fix","stage":"gold"}
 {"issue":3740,"library":"click","pr":3739,"reason":"question_text_names_the_fix_pr","stage":"gold"}
+{"checked_by":"ameya","detail":"test_captures_behaviour: no (the failing test is tests/test_utils.py::test_filename_formatting about surrogate-escape handling of filenames ('foo\\udcff.txt' vs 'foo\\ufffd.txt'). It does not reproduce the AttributeError the issue is about. Looks like the fix PR bundled several changes and the picked fail-to-pass is from an unrelated one.)","issue":1844,"library":"click","pr":1846,"qid":"click-1844","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"sourav","detail":"test_captures_behaviour: no (feature request for a new UserWarning. 'DID NOT WARN' on the frozen code only proves the warning is new; it does not show any existing bug. Worked-example-2 shape.)","issue":2396,"library":"click","pr":2397,"qid":"click-2396","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"sunil","detail":"test_captures_behaviour: no (pure feature request. 'Parameter.__init__() got an unexpected keyword argument help' is the worked-example-2 pattern: it proves the kwarg is new, not any current behaviour.)","issue":2983,"library":"click","pr":3473,"qid":"click-2983","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"sourav","detail":"test_captures_behaviour: no (clearly a feature request. The tests check for the new 'Did you mean' / 'Possible options' text in the output, which the frozen code cannot emit. test_unknown_options also tests a new error-text format. On frozen these all fail because the new feature is not there, not because of a current bug.)","issue":3107,"library":"click","pr":3228,"qid":"click-3107","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"sunil","detail":"test_captures_behaviour: no (feature request. TypeError 'click.types.Path is not a generic class' at runtime only proves Path was not declared Generic yet; it is the missing-symbol / class-not-generic pattern from example 2.)","issue":3822,"library":"click","pr":3858,"qid":"click-3822","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"sourav","detail":"test_captures_behaviour: no (pure feature request for a new temp_dir kwarg. The TypeError 'got an unexpected keyword argument temp_dir' is the worked-example-2 pattern: it proves the kwarg is new, not any behaviour.)","issue":395,"library":"click","pr":1715,"qid":"click-395","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"ameya","detail":"test_captures_behaviour: no (feature request: the fix adds a DeprecationWarning that did not exist before. 'DID NOT WARN' only proves the new warning is new, not any current bug. Same shape as the worked example 2.)","issue":2227,"library":"marshmallow","pr":2229,"qid":"marshmallow-2227","reason":"spot_check_invalid","stage":"spot_check"}
+{"checked_by":"sourav","detail":"test_captures_behaviour: no (feature request: 'DID NOT RAISE TypeError' only proves the abstract-check is new. It does not show a behavioural bug on the frozen code.)","issue":2924,"library":"marshmallow","pr":2925,"qid":"marshmallow-2924","reason":"spot_check_invalid","stage":"spot_check"}
