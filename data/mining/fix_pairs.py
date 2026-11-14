@@ -6,7 +6,8 @@ decided which lines matter, so the gold cannot favour the mutation check.
 
 Funnel (every drop gets a reason; `data/mining_report.md` shows the counts):
     closed PRs -> merged since the cutoff -> linked to an issue
-    -> issue not created by a bot -> changes source AND tests -> at most N source files
+    -> issue not created by a bot -> issue not a feature request (D-43)
+    -> changes source AND tests -> at most N source files
 
 Every raw API response is cached under `.cache/github/`, so re-runs make no
 API calls. The cache is git-ignored: raw responses never reach the public repo.
@@ -25,7 +26,7 @@ from typing import Any, Callable, Iterator
 import requests
 
 from core.config import REPO_ROOT, load_config
-from core.env import require_key
+from core.env import key_present, require_key
 
 API = "https://api.github.com"
 LINK_RE = re.compile(r"\b(?:fix|fixes|fixed|close|closes|closed|resolve|resolves|resolved)\s*:?\s+"
@@ -109,6 +110,27 @@ def is_bot(user: dict[str, Any] | None) -> bool:
     return user.get("type") == "Bot" or login.endswith("[bot]") or login in ("dependabot", "pre-commit-ci")
 
 
+FEATURE_LABEL_WORDS = ("feature", "enhancement")
+
+
+def is_feature_request(issue: dict[str, Any]) -> bool:
+    """True if GitHub's own metadata marks the issue as a feature request (D-43).
+
+    Why: a feature request asks for new behaviour, so the frozen code cannot answer
+    it. We use only metadata people set on GitHub (a label naming a feature or
+    enhancement, or the issue type "Feature"); no LLM may filter gold. Issues with
+    neither are kept, and the human spot check catches what this misses.
+    """
+    for label in issue.get("labels") or []:
+        name = (label.get("name") if isinstance(label, dict) else str(label)) or ""
+        if any(word in name.lower() for word in FEATURE_LABEL_WORDS):
+            return True
+    issue_type = issue.get("type")
+    if isinstance(issue_type, dict):
+        issue_type = issue_type.get("name")
+    return isinstance(issue_type, str) and issue_type.strip().lower() == "feature"
+
+
 def classify_files(files: list[dict[str, Any]], package: str, tests_dir: str) -> dict[str, list[str]]:
     """Split changed paths into source (inside the package), test, docs and other files."""
     out: dict[str, list[str]] = {"source": [], "test": [], "docs": [], "other": []}
@@ -179,6 +201,11 @@ def mine_library(gh: GitHub, lib: str, spec: dict[str, Any], *, merged_since: st
             continue
         counts["issue_not_bot"] = counts.get("issue_not_bot", 0) + 1
 
+        if is_feature_request(issue):
+            dropped(n, "feature_request", issue=issue["number"])
+            continue
+        counts["issue_not_feature"] = counts.get("issue_not_feature", 0) + 1
+
         files = list(gh.paginate(f"/repos/{owner}/{repo}/pulls/{n}/files"))
         groups = classify_files(files, spec["package"], spec["tests_dir"])
         if not groups["source"]:
@@ -211,7 +238,9 @@ def mine(libraries: list[str] | None = None, config: dict[str, Any] | None = Non
     """Mine the configured libraries. Returns {"pairs", "dropped", "counts": {lib: {...}}}."""
     cfg = config or load_config()
     data_cfg = cfg["data"]
-    gh = gh or GitHub(REPO_ROOT / cfg["paths"]["github_cache"], token=require_key("GITHUB_TOKEN"))
+    # The token is needed only on a cache miss; a fully cached re-run works without it.
+    token = require_key("GITHUB_TOKEN") if key_present("GITHUB_TOKEN") else None
+    gh = gh or GitHub(REPO_ROOT / cfg["paths"]["github_cache"], token=token)
     pairs: list[dict[str, Any]] = []
     dropped: list[dict[str, Any]] = []
     counts: dict[str, dict[str, int]] = {}

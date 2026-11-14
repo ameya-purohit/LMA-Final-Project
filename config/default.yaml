@@ -24,14 +24,20 @@ llm:
     # Measured from Google's own 429s on 2026-10-30 (docs/quota.md): 15 per minute, 500 per day, 250,000 input tokens per minute.
     rpm: 15
     rpd: 500
+    # D-50: several team members' keys for the same model, each with its own daily counter and limit (rpd applies
+    # per key). Only keys present in .env are used; a missing one is skipped. Values are never logged.
+    key_envs: [GEMINI_API_KEY, GEMINI_API_KEY_2, GEMINI_API_KEY_3, GEMINI_API_KEY_4]
   judge:
     # Final judge chosen at P8 (D-37) and kept by Ameya without a Mistral key (D-42): Groq gpt-oss-120b, throttled.
     # One judge per experiment: the test-set size at G2 is chosen so that its daily token limit is enough.
     provider: groq
     model: openai/gpt-oss-120b
-    # Starting guesses; real limits are learned from 429s and logged in docs/quota.md.
-    rpm: 6
-    rpd: 1000
+    # D-50 assumed Groq's paid Developer plan; on 2026-11-07 the key still answered on the free `on_demand` tier
+    # (200,000 tokens a day, about 60 judgements). D-53: several members' Groq keys for the same model, rotated like
+    # the main model's keys; each is used only when present. Real limits are logged in docs/quota.md.
+    key_envs: [GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_KEY_4]
+    rpm: 30
+    rpd: 5000
   retry:
     max_attempts: 6
     base_delay_s: 2.0
@@ -71,6 +77,15 @@ data:
 retrieval:
   code_top_k: 5
   doc_top_k: 3
+  # Exploratory extension only (E2+ and the retrieval study); the locked systems use BM25 alone.
+  hybrid:
+    dense_model: BAAI/bge-small-en-v1.5        # small, general text model: the laptop has ~1 GB of free memory
+    rerank_model: Xenova/ms-marco-MiniLM-L-6-v2
+    rrf_k: 60                                  # Cormack et al. (2009), not tuned
+    fuse_depth: 50
+    rerank_depth: 30
+    max_chars: 800
+    batch_size: 8
 
 tools:
   open_file_max_lines: 200
@@ -103,3 +118,21 @@ eval:
   bootstrap_seed: 82
   ci_level: 0.95
   kappa_threshold: 0.6
+
+# Exploratory multi-agent extension (E1-E6, PREREGISTRATION.md "Exploratory extension"). Not used by the locked study.
+multiagent:
+  max_requests: 12
+  investigator_steps: 3
+  analyst_steps: 2
+  max_probe_runs: 12
+  max_probe_repairs: 2
+  single_budget: 8          # single-line mutation checks per question
+  pair_budget: 3            # pairwise checks per question (E4+)
+  max_mutants: 12
+  max_candidates: 16
+  flags:
+    hybrid: false           # E2+
+    graph: false            # E3+
+    pairs: false            # E4+
+    active: false           # E5+
+    mcp: false              # E6

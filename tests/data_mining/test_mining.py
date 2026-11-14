@@ -6,7 +6,7 @@ import subprocess
 import pytest
 
 from data import freeze
-from data.mining.fix_pairs import GitHub, classify_files, is_bot, linked_issue_numbers, mine_library
+from data.mining.fix_pairs import GitHub, classify_files, is_bot, is_feature_request, linked_issue_numbers, mine_library
 from data.patch import apply_patch, parse_hunks, split_files, split_patch
 from data.split import stratified_split
 from data.validate_questions import check_questions
@@ -98,6 +98,31 @@ def test_funnel_counts_and_reasons(tmp_path):
     assert counts["linked_issue"] == 5 and counts["issue_not_bot"] == 4 and counts["source_and_test"] == 2 and counts["candidates"] == 1
     assert sorted(d["reason"] for d in dropped) == sorted(["no_linked_issue", "no_linked_issue", "no_source_change", "no_test_change",
                                                            "issue_by_bot", "too_many_source_files"])
+
+
+def test_is_feature_request():
+    assert is_feature_request({"labels": [{"name": "Feature request"}]})
+    assert is_feature_request({"labels": [{"name": "enhancement"}]})
+    assert is_feature_request({"labels": [], "type": {"name": "Feature"}})
+    assert not is_feature_request({"labels": [{"name": "bug"}, {"name": "help wanted"}], "type": {"name": "Bug"}})
+    assert not is_feature_request({"labels": [], "type": None})
+    assert not is_feature_request({})
+
+
+def test_feature_requests_are_dropped_with_a_reason(tmp_path):
+    routes = {
+        "/repos/o/r/pulls": [pr(1, title="Fixes #50"), pr(2, title="fix #60"), pr(3, title="fix #61")],
+        "/repos/o/r/issues/50": ISSUE,
+        "/repos/o/r/issues/60": {**ISSUE, "number": 60, "type": {"name": "Feature"}},
+        "/repos/o/r/issues/61": {**ISSUE, "number": 61, "labels": [{"name": "enhancement"}]},
+        "/repos/o/r/pulls/1/files": SRC_AND_TEST, "/repos/o/r/pulls/1": {"commits": 1},
+    }
+    gh = GitHub(tmp_path / "gh", token=None, session=FakeSession(routes), sleep=lambda s: None)
+    dropped, counts = [], {}
+    pairs = mine_library(gh, "lib", SPEC, merged_since="2020-01-01", max_source_files=10, drop=dropped.append, counts=counts)
+    assert [p["pr_number"] for p in pairs] == [1]
+    assert counts["issue_not_bot"] == 3 and counts["issue_not_feature"] == 1
+    assert sorted((d["pr"], d["issue"], d["reason"]) for d in dropped) == [(2, 60, "feature_request"), (3, 61, "feature_request")]
 
 
 def test_cache_makes_rerun_free(tmp_path):
@@ -206,6 +231,20 @@ def test_split_is_stratified_exact_and_seeded():
     assert [q["qid"] for q in dev] == [q["qid"] for q in again], "must not depend on input order"
     other, _ = stratified_split(qs, 20, 83)
     assert [q["qid"] for q in dev] != [q["qid"] for q in other]
+
+
+def test_split_keeps_pinned_dev_questions_out_of_test():
+    qs = [_q(f"a{i:02d}") for i in range(60)] + [_q(f"b{i:02d}", "marshmallow", "doc_related") for i in range(40)]
+    pinned = frozenset({"a00", "a01", "a02", "b00", "gone"})  # "gone" was removed from the dataset since
+    dev, test = stratified_split(qs, 20, 82, pinned)
+    ids = {q["qid"] for q in dev}
+    assert len(dev) == 20 and len(test) == 80 and {"a00", "a01", "a02", "b00"} <= ids
+    assert not ids & {q["qid"] for q in test}
+    assert sum(q["library"] == "click" for q in dev) == 12, "free slots still follow the strata quotas"
+    again, _ = stratified_split(list(reversed(qs)), 20, 82, pinned)
+    assert [q["qid"] for q in dev] == [q["qid"] for q in again]
+    big, rest = stratified_split(qs, 2, 82, pinned)
+    assert {q["qid"] for q in big} == {"a00", "a01", "a02", "b00"} and len(rest) == 96, "pins win over dev_size"
 
 
 VALID = {"qid": "click-1", "library": "click", "issue_url": "u", "issue_number": 1, "created_at": "2021", "question_text": "why?",

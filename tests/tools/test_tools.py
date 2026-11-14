@@ -189,3 +189,19 @@ def test_every_tool_on_a_frozen_click_commit():
     assert reg.call("git_log", {"path": core, "n": 2}).ok
     assert reg.call("git_blame", {"path": core, "start": 1, "end": 3}).ok
     assert reg.counts["errors"] == 0 and reg.counts["invalid"] == 0
+
+
+def test_workspace_uses_the_variant_tree_and_its_own_index(tmp_path, monkeypatch):
+    """The adversarial set's planted trees (data/adversarial.py) are separate copies with a separate index cache."""
+    import tools.workspace as W
+    for name in ("abc", "abc+adv01"):
+        pkg = tmp_path / "trees" / "click" / name / "src" / "click"
+        pkg.mkdir(parents=True)
+        (pkg / "__init__.py").write_text("")
+    monkeypatch.setattr(W, "REPO_ROOT", tmp_path)
+    cfg = {"data": {"libraries": {"click": {"package": "click", "tests_dir": "tests"}}},
+           "paths": {"trees_dir": "trees", "repos_dir": "repos", "index_dir": "idx"}}
+    w = Workspace.for_question({"library": "click", "frozen_commit": "abc", "tree_variant": "adv01"}, cfg)
+    assert w.tree.name == "abc+adv01" and w.commit == "abc" and w.variant == "adv01"
+    with pytest.raises(FileNotFoundError):
+        Workspace.for_question({"library": "click", "frozen_commit": "abc", "tree_variant": "adv99"}, cfg)

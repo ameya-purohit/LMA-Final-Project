@@ -25,12 +25,17 @@ dependencies = [
     "hypothesis>=6.90",
 ]
 
+[project.optional-dependencies]
+# The exploratory multi-agent extension (E1-E6, retrieval study). The locked study does not need these.
+extension = ["networkx>=3.2", "fastembed>=0.5", "faiss-cpu>=1.8", "mcp>=1.2,<2"]
+
 [tool.setuptools.packages.find]
 # Flat layout with several top-level packages. `find` (not an explicit list)
 # so that a checkout holding only some member bundles still installs.
 include = [
     "core*", "llm*", "sandbox*", "tools*", "retrieval*", "data*",
     "annotation*", "agent*", "baselines*", "eval*", "analysis*", "scripts*",
+    "codegraph*", "multiagent*", "experiments*", "mcp_server*",
 ]
 
 [tool.pytest.ini_options]

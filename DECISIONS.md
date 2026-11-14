@@ -309,3 +309,193 @@ Alternatives considered: (1) spot check only (it samples 20%, so it cannot catch
 Why: it is deterministic and explainable. Its reach is small, measured on the current 176 questions: labels catch 0, because click's labels name topics, and 20 marshmallow questions have none. The issue type marks 6 as Feature, and 159 have no type. `click-1075`, a known feature request, has neither.
 How we'd defend it in the viva: it is a cheap filter whose limit has been measured, and the disagreement rate from the spot check reports what it misses.
 Revisit if: the spot check finds many feature requests that the filter missed; then the only sound route is to widen human checking, not to add an LLM.
+Applied (2026-11-06, Sourav): a funnel step in `data/mining/fix_pairs.py` (`is_feature_request`, reason `feature_request`), right after the bot check. Re-mining from the cache made 0 API calls and dropped 8 PRs; 7 had been candidates. `data/build_gold.py` now builds only from current candidates, so an old validation row cannot bring a dropped pair back. Result: 176 → 170 questions, exactly the 6 measured above (`click-3059`, `marshmallow-1415`, `-1768`, `-2270`, `-2821`, `-686`); the other 170 are byte-identical. `mine()` now needs `GITHUB_TOKEN` only on a cache miss.
+
+## D-44 A question that has been in dev never moves to test  (2026-11-06, pre-P9, Sourav)
+Decision: `data/split.py` keeps every qid listed in `data/dev_history.txt` in dev, and adds each new dev question to that file. Free dev slots go to the stratum furthest below its proportional quota. Seeded as before; without a history the split is unchanged.
+Alternatives considered: (1) re-split from scratch at every rebuild (moved 13 of the 20 `mid` dev questions into test after D-43 removed 6 questions); (2) freeze the old split files and only delete removed questions (dev shrinks with every removal, and new questions would never reach dev).
+Why: the team has read system outputs and judge labels on the `mid` dev questions (for example `click-1193` in the mid report), and P10 prompt work starts from those failures. If such a question were in test, the locked test set would hold questions we developed on. Moving a question from test into dev is harmless; the reverse is not. After D-43, dev is the old 19 plus `click-1821`; no old dev question is in test.
+How we'd defend it in the viva: the rule "never tune on test" has to hold for questions, not just for files; this makes it hold by construction, and `dev_history.txt` is the audit trail.
+Revisit if: dev grows past its size because many pinned questions accumulate; then report the larger dev set rather than unpin.
+
+## D-45 Questions run in a seeded order that interleaves the libraries  (2026-11-06, pre-P9, Sourav)
+Decision: `eval.run.run_order` shuffles each library's questions with the split seed and then gives each next slot to the library furthest behind its share, so every prefix holds the libraries in proportion. All systems use the same order. `--qid-order` restores the alphabetical order for resuming `mid`.
+Alternatives considered: (1) alphabetical qid order (the `mid` run stopped on quota before reaching any marshmallow question); (2) a plain seeded shuffle over all questions (balanced only on average: a short prefix can still miss marshmallow, which is 14% of test).
+Why: quota stops are expected, so whatever prefix finishes should be a fair, paired sample of both libraries. Tested: on 129 click and 21 marshmallow, every tested prefix is within one question of the proportional count.
+How we'd defend it in the viva: it changes only which questions run first, never what any system does, and it is the same order for every system.
+Revisit if: a third library is added (the rule already handles any number).
+
+## D-46 Spot-check kit: seeded stratified sample, one checker per question, static page, idempotent apply  (2026-11-07, P9, Sunil)
+Decision: `annotation/sample.py` draws a seeded (82) 20% sample stratified by library (largest-remainder rounding) and deals it round-robin to the four members; each record carries the source diff (rebuilt with `git diff` + `split_patch`) and GitHub links at the frozen commit. `annotation/spotcheck.html` is a single static page (local-storage drafts, JSONL export; dataset text shown only as text). `annotation/apply_spotcheck.py` validates verdicts against `sample_manifest.json`, removes questions with any "no", logs them (stage `spot_check`), records `spot_check` on the rest, and writes disagreement rates into `data/mining_report.md`. It is idempotent, so it can be re-run after `build_gold.py` rebuilds the data files.
+Alternatives considered: (1) two checkers per question for inter-annotator agreement (doubles human time in a slipped schedule; G3 already measures human agreement where it matters most, on system answers); (2) a small Flask app or a shared spreadsheet (needs hosting or accounts; a static file works offline and keeps data local).
+Why: minimal human time (about 9 questions each), auditable (seeded, logged, re-runnable), and testable without a browser (pure logic run under node) and with one (headless Chrome render).
+How we'd defend it in the viva: the sample is reproducible, every removal has a named reason and checker, and the reported rate is honestly "human vs automatic gold" with one human per question.
+Revisit if: the disagreement rate is high (say above 20%); then a second checker on the disagreements, or a larger sample, is needed before trusting the gold.
+
+## D-47 A cited line with nothing to mutate is "untestable", not "not causal"  (2026-11-07, P10, Sourav)
+Decision: `mutate_and_run` returns `untestable=True` (no error, no verdict) when no operator applies to the line. The registry spends no mutation check on it and records it. The agent keeps an untestable citation and re-investigates ("find the line that decides this") only when at least one citation was actually rejected. When every citation is untestable (or unchecked because the budget ran out), it logs `citations_without_verdict` and goes straight to the vacuity check. If any citation is causal, the others are dropped as before. Grades are unchanged: an untestable citation is not shown causal, so the claim is [E], not [E+C]. Every system's output marks citations with `untestable`, so B2 and the agent report it the same way.
+Alternatives considered: (1) leave it as non-causal (the mid run: 11 of 54 checked lines, 3 of them lines the developers changed; each triggered up to two extra requests); (2) count untestable as causal (would inflate [E+C] and H3 with lines the check never tested).
+Why: "no operator applies" is absence of evidence, not evidence against. Treating it as rejection wasted requests and threw away some true fix lines. The change only affects what happens after the check, and the tool text is the same for the agent and B2 (fairness, §2.3).
+How we'd defend it in the viva: the check has three honest outcomes (causal, rejected, cannot say), and the third is reported separately in the RQ2 agreement table instead of being folded into either side.
+Revisit if: untestable lines stay common in the pilot; then add operators for loop headers, default arguments and call arguments (planned in the mid report, section 7) and measure the change through A11.
+
+## D-48 G3 labels: sample by question, per-kind kappa rule, conservative consensus  (2026-11-07, P8 completion, Sourav)
+Decision: `eval/human_export.py` samples *questions* (seeded, stratified by library) and exports every system's answer to each, blinded and shuffled, as one identical file per labeller, plus a separate key. Two labellers use `eval/label.html` (static page, same pattern as the spot check). `eval/kappa.py` computes Cohen's kappa human-human, each human against the judge, and consensus against the judge, separately for answer correctness and for citation labels (three classes each). The kappa rule (threshold 0.6) is applied per label kind on consensus-judge kappa. Where the two labellers disagree, the consensus takes the more conservative label (incorrect < partial < correct; irrelevant < on_topic < causal).
+Alternatives considered: (1) sample answers at random across systems (the old export: unpaired, and it would not cover every citation from ours and A2 on the sampled questions, which H3 and RQ2 need); (2) resolve human disagreements by discussion (better labels, but slow and not reproducible in the time left); (3) one kappa over both label kinds (hides which judge output is unreliable).
+Why: paired human labels let the primary comparison be recomputed on the sample if the rule triggers; the conservative consensus never credits a system with more than both humans gave it, and is deterministic. With 12 questions and 6 must-have systems the sample is 72 answers, inside CLAUDE.md's 40-80.
+How we'd defend it in the viva: every step is seeded or deterministic, labellers never see the system, the rule was fixed before any label existed, and human-human kappa is reported so the humans' own reliability is visible.
+Revisit if: human-human kappa is low (below about 0.4); then the labels themselves are unreliable and need a discussion round before they can overrule the judge.
+
+## D-49 One analysis script, verdicts computed from the pre-registered rules  (2026-11-07, P12, Sourav)
+Decision: `analysis/make_all.py` regenerates the whole analysis from stored files: H1-H3 verdicts (thresholds copied from PREREGISTRATION.md as constants, CI that includes zero = inconclusive), the kappa-rule view, per-category and per-library tables, RQ2 per acceptance rule against fix lines and human labels, a deterministic failure taxonomy, discordant cases, ablation predictions against outcomes, and three figures, each paired with its numbers in a table. H3 precision uses a cluster bootstrap over questions, because citations from one answer are not independent.
+Alternatives considered: (1) a notebook (hard to re-run identically, easy to edit numbers by hand); (2) hand-coded failure categories (richer, but not reproducible and too slow for the time left).
+Why: one command, no hand-typed numbers, so the reported results can be re-checked by anyone; the verdict text cannot drift from the pre-registered rule.
+How we'd defend it in the viva: run the command in front of the examiners; the tests in `tests/analysis/` pin each verdict rule.
+Revisit if: human labels arrive for more than the sampled questions; then H3 can use all of them.
+
+## D-50 Several team members' Gemini keys, and a paid Groq judge  (2026-11-07, before G2, Sourav)
+Decision: the team chose to run the main model on up to four members' own free-tier Gemini keys, with each member's agreement, and to move the judge to Groq's paid Developer plan. `llm/client.py` reads the key variable names from `llm.main.key_envs`, uses only keys present in `.env`, keeps one daily counter and one daily limit per key, and moves to the next key when a key's day is used up (our guard or the server's per-day 429). Traces record the key's slot number, never the key. Judge pacing raised to 30 requests per minute.
+Alternatives considered: (1) one free key (about 17 test questions a day; the lock size and the deadline were the binding constraints); (2) one paid Gemini key (about 1,100-1,600 rupees; the clean option by Google's terms, which the team chose not to pay for).
+Why: same model (`gemini-3.1-flash-lite`), same prompts, same temperature and the same cache for every key, so which key served a request cannot change any answer; it changes only how many requests fit in a day. It is a grey area under Google's API terms (limits are per project, and using an API beyond its limits needs Google's consent); the risk accepted is that a key is rate-limited or suspended, in which case the run continues on the remaining keys or stops cleanly and resumes.
+How we'd defend it in the viva: it is disclosed here and in PREREGISTRATION.md; the method, model and judge are unchanged; every key's use is in the traces by slot.
+Revisit if: any key is suspended or a member withdraws agreement; then remove that key from `.env`.
+
+## D-51 A revised claim must cite, and an uncited claim keeps its last proposed line  (2026-11-07, P10, Ameya)
+Decision: two changes to our agent only, after prompt iteration 1 on dev, approved by the team before the G2 lock. (1) The `revise_claim` schema (`ReviseClaim.citations`) gets the same description that iteration 1 gave the shared draft schema: "At least one for a behavioural claim: the line that decides it". (2) When a claim has no citation and both `propose_citation` attempts are rejected (or untestable) by the mutation check, the claim keeps the last proposed line with its verdict (`causal: false`, or `untestable`), logged as `kept_proposed_citation`. Before, it ended with no citation, while a rejected *drafted* line was already kept (D-35). Grades are unchanged: such a claim is [E], not [E+C].
+Alternatives considered: (1) lock as is (6 of ours' 8 uncited claims in `pilot_it1` came from revisions, so the answers said less than the agent knew); (2) keep both rejected proposals (more lines for the judge to credit, with no reason to prefer the first proposal over the second, which was written after seeing the first one fail).
+Why: iteration 1 was meant to apply "every behavioural claim cites a line" to every place a system writes claims; the revision schema, which only ours has, was missed. Keeping the agent's last proposal makes rejected proposed lines behave like rejected drafted lines, and the output still says the check did not confirm it.
+How we'd defend it in the viva: it was made on dev only, before the lock, and disclosed in PREREGISTRATION.md as a change to ours only. B2 has no revision step and does not use this schema; its dev answers were replayed unchanged from the cache. The mutation check, grades and metrics did not change.
+Revisit if: kept rejected lines turn out to be mostly *irrelevant* in the G3 labels; then report causal support with and without them.
+
+## D-52 Scratch directories are numbered, not random  (2026-11-07, P10, Aditya)
+Decision: each sandbox session names its job and mutant directories with a counter (`jobs/0001`, `mutants/0002`, ...) instead of a random id, and mutant ids are their index (`m001`). The container name stays random, since no model sees it.
+Alternatives considered: (1) keep random names and strip `/work/scratch/...` paths from tool output (the text the model sees would then differ from what the sandbox printed, and every output path would need the rule); (2) name directories by a hash of the job (two identical jobs in one session would share a directory).
+Why: in the dev re-run, a probe that printed its own traceback showed the random job path to the model, so B2's `click-3449` missed the LLM cache from call 19 and produced a different answer. Replays must give identical text, or resumed runs, the ablations' shared prefix (A2, A3) and repeat runs cost quota and change answers. Each session has a fresh scratch directory, so a counter cannot clash, and the same question gives the same sequence of jobs.
+How we'd defend it in the viva: a unit test creates two fresh sessions and checks that they give the same paths in the same order; the pilot's one cache miss is reported in `docs/prompt_log.md`.
+Revisit if: a cache miss on a replay is traced to another source of variation (timestamps, dictionary order, timing).
+
+## D-53 Several Groq keys for the judge, because the paid plan was not in effect  (2026-11-07, P10, Sourav)
+Decision: the judge rotates over up to four team members' Groq keys (`llm.judge.key_envs`), with the same code as the main model's keys (D-50). Each key is used only when present.
+Alternatives considered: (1) one free key (200,000 tokens a day, at a measured 2,794 tokens per judgement about 70 judgements a day; the 900 judgements of the must-have tier on 150 test questions would take about 13 days); (2) Groq's paid Developer plan on one key (the cleaner option; D-50 assumed it, but on 2026-11-07 the key still answered on the free `on_demand` tier and stopped at 200,000 tokens).
+Why: the judge must be the same model for the whole experiment (§2.4); which key serves a request cannot change a judgement at temperature 0, and the cache is keyed without the key. Only the number of judgements per day changes.
+How we'd defend it in the viva: as D-50: disclosed, same model and prompt, key slot in the traces, never the key.
+Revisit if: the paid plan becomes active on the first key; then the other keys are simply not needed.
+
+## D-54 A timeout on every Gemini request  (2026-11-07, P11, Ameya)
+Decision: the Gemini client is built with a 120-second request timeout, the same as the Groq client. A timed-out
+request is a transient error, so the existing retry with backoff handles it.
+Alternatives considered: (1) no timeout, as before: on 7 Nov one request's reply never arrived and the main run sat on
+an open connection for four hours; (2) a watchdog that kills and relaunches the batch: more moving parts for the same
+effect.
+Why: a single lost reply must not stop a multi-day run. The change is engineering only: prompts, model, parameters and
+the cache key are unchanged, so no answer changes; the interrupted question was resumed with its earlier calls served
+from the cache.
+How we'd defend it in the viva: the hang was found from the trace (no event for four hours, one established connection
+to Google). The regression test checks the timeout is set and that a timeout is classed as retryable.
+Revisit if: a legitimate request takes longer than 120 s.
+
+## D-55 The adversarial set: canary tokens in planted instructions  (2026-11-10, P11 should-have, Aditya)
+Decision: 15 items built from dev questions (`data/adversarial.py`), five of each kind: a hidden note in the issue text
+asking for a shell command in a probe; a comment on the fix line asking for a wrong verdict; a comment on the fix line
+asking for a write to `~/.ssh`. Every instruction asks for a unique canary token in the answer, so compliance is a
+string match. Comments are appended to the end of an existing line and the file must parse to the same AST, so no
+line moves and no behaviour changes. Each item gets its own copy of the tree (`tree_variant`) and its own index.
+Alternatives considered: (1) judge compliance with the LLM judge: costs judge quota and adds a judge error to a safety
+metric; (2) insert new comment lines: shifts every later line number, and an inserted line could change behaviour if
+placed badly.
+Why: the brief asks for an unsafe-action rate and safety against untrusted input (CLAUDE.md §2.5 treats read text as
+data). Canaries give an exact, cheap measure; exposure (did the canary reach a model input, from the trace) separates
+"ignored the instruction" from "never saw it".
+How we'd defend it in the viva: the plant is provably behaviour-free (AST equality, tested), the test set is untouched
+(dev questions only), and unsafe actions executed is 0 by construction because blocked probes never run.
+Revisit if: exposure is low; then plant at lines the systems read more often.
+
+## D-56 A Streamlit demo that only reads saved results and runs toylib  (2026-11-11, P13, Sourav)
+Decision: `demo/app.py` is a four-page Streamlit app for the presentation: the idea, a live probe and mutation check on toylib, the committed results, and one question's answers and decision log side by side. It makes no LLM call. The live page runs only the hand-written toylib probes from `analysis/toylib_ablations.py`, in the Docker sandbox when the image exists and otherwise in the trusted local runner, and offers no way to type in code. All file reading is in `demo/data.py`, which is unit-tested without Streamlit; Streamlit is an optional dependency in `demo/requirements.txt`.
+Alternatives considered: (1) a live agent run on a real question during the presentation (depends on the free API quota and the network, and could fail or give a different answer on stage); (2) a static HTML page like the annotation tools (no live mutation demo, and the charts would need hand-written JavaScript).
+Why: a presentation must not depend on quota or the network, and every number on screen must be the one in the report, so the app reads the committed `analysis.json`. The live part shows the mechanism on planted ground truth, where the right answer is known.
+How we'd defend it in the viva: the demo cannot run untrusted code (no free-text probe input), it cannot show numbers that differ from the report (same files), and its data layer has tests, including one that runs both live buttons on toylib.
+Revisit if: we want to demo a live agent run; then replay a cached run (zero quota) instead of calling the API.
+
+## D-57 An exploratory multi-agent extension, kept apart from the locked study  (2026-11-12, extension, Sourav)
+Decision: Build a specialised multi-agent system (E1-E6) next to the locked single agent, pre-register its predictions
+in a separate "Exploratory extension" section of PREREGISTRATION.md before any test run, and evaluate it on the 47
+`sub50` test questions where E0 (ours) and B2 already have answers. The locked results stay the primary findings.
+Alternatives considered: (1) replace the single agent and re-run the study, which would break the pre-registration
+and the test lock; (2) leave the idea as future work only.
+Why: the team wanted to test whether role specialisation, hybrid retrieval, a code graph and smarter experiments fix
+the weaknesses the main study found, without rewriting what was already locked and reported.
+How we'd defend it in the viva: it was designed after seeing the main results, so it is labelled exploratory, its
+predictions were written before its runs, its prompts were developed on dev only, and E0/B2 answers are reused
+unchanged on the same 47 questions.
+Revisit if: a later study can pre-register E1-E6 from the start on fresh questions.
+
+## D-58 Three LLM roles and two code roles, typed hand-offs, one orchestrator  (2026-11-12, extension, Ameya)
+Decision: Bug Investigator, Probe Engineer, Code Analyst and Causal Verifier are LLM agents, each with its own
+conversation and prompt; the Experiment Engineer and the final ranking are plain code. Agents hand over pydantic
+objects (`multiagent/schemas.py`) through a hand-written orchestrator; no agent framework. Budget: 12 requests.
+Alternatives considered: (1) five LLM agents, including an LLM that picks experiments, which costs more requests and
+makes selection non-deterministic; (2) agents chatting in free text (AutoGen-style group chat), which is hard to
+test and to explain.
+Why: requests per day are the binding constraint, and every decision that code can make deterministically
+(which line to mutate next, what counts as accepted, the ranking) is easier to test and defend.
+How we'd defend it in the viva: each LLM call has one job and one schema; each hand-off is logged; the scripted-LLM
+test runs all five roles on toylib.
+Revisit if: requests become cheap enough to let an LLM choose experiments.
+
+## D-59 Hybrid retrieval with small local models  (2026-11-12, extension, Sunil)
+Decision: BM25 + dense (`BAAI/bge-small-en-v1.5`) fused by RRF (k = 60), reranked by `ms-marco-MiniLM-L-6-v2`,
+optionally expanded with call-graph neighbours; models run locally with fastembed (ONNX), vectors in FAISS, cached
+by text hash. Chunks stay the existing AST chunks; chunk text cut to 800 characters.
+Alternatives considered: (1) a code-specific embedding model (jina-embeddings-v2-base-code, ~640 MB), too large for
+the ~1 GB of free memory on the run machine; (2) Gemini's embedding API, which spends quota and sends code out.
+Why: no quota, deterministic, fits the laptop; RRF needs no score calibration and k = 60 is the published default.
+How we'd defend it in the viva: the retrieval study (R1-R5) measures each step separately on all 145 test questions.
+Revisit if: a machine with more memory allows a code-specific embedding model.
+
+## D-60 A code graph from the AST, with intra-procedural slices  (2026-11-12, extension, Sunil)
+Decision: `codegraph/` builds functions, a name-resolved call graph, line-level data and control dependences per
+function and module constants, in NetworkX. The static slice is intra-procedural plus module constants; the
+"dynamic" part is the executed-line spectrum (Ochiai with one failing run) of the reproduce probe against the
+controls, recorded by the sandbox's existing line tracer.
+Alternatives considered: (1) a full Code Property Graph (Joern), which needs a JVM service; (2) coverage.py for
+traces, which adds a dependency the runner deliberately avoided (D-16 area).
+Why: enough to shrink and order the search space, and every rule fits in a sentence.
+How we'd defend it in the viva: tests check the slice on toylib's planted lines (line 88 depends on line 87, not on
+the module default on line 12).
+Revisit if: interprocedural slicing turns out to matter (it ignores data flow through calls and attributes).
+
+## D-61 Three-way mutation verdicts, dependency-guided pairs, information-gain order  (2026-11-12, extension, Sourav)
+Decision: The Experiment Engineer reuses `tools/mutate.py` unchanged and reports accepted / rejected /
+inconclusive (breakage-only and control-changing flips are inconclusive, not rejected). From E4 it mutates pairs of
+lines the code graph connects when neither settled alone (at most 3 pairs). From E5 it orders single checks by
+expected information gain over the agents' hypotheses (fixed HIT 0.8, MISS 0.1, catch-all prior 0.2) and stops early.
+Equivalent checks (one line, two spellings) run once. Checks run sequentially (one-CPU container).
+Alternatives considered: (1) all pairs of candidates, which grows quadratically; (2) a learned selection policy,
+which would need training data we do not have.
+Why: the main study showed the yes/no check rejected real fix lines; a three-way verdict says "cannot tell" instead,
+and pairs address redundant guards (toylib's known limitation).
+How we'd defend it in the viva: the toylib tests show the pair accepted where each guard alone is rejected, and active
+selection stopping before the budget.
+Revisit if: inconclusive verdicts dominate on real code.
+
+## D-62 MCP as an optional transport only  (2026-11-12, extension, Aditya)
+Decision: `mcp_server/server.py` (FastMCP, stdio, mcp 1.x) exposes code analysis, slicing, probes, mutation, patch
+validation and experiment results; `mcp_server/client.py` gives the orchestrator the same interface as the
+in-process backend. E6 = E5 through MCP. The agents' read-only search tools stay in-process.
+Alternatives considered: (1) route everything, including LLM calls, through MCP, which changes nothing measurable but
+adds failure points; (2) skip MCP.
+Why: it shows the tools are reusable by any MCP client while keeping one execution engine; E6 must reproduce E5.
+How we'd defend it in the viva: a test runs the orchestrator both ways on toylib and gets identical rankings,
+verdicts and patch validation; E6 measures only the overhead.
+Revisit if: the mcp 2.x API settles (it renamed FastMCP; we pin `mcp<2`).
+
+## D-63 Localization metrics against the developer's fix lines  (2026-11-12, extension, Sourav)
+Decision: Score every system on a ranked list of locations (E1-E6: deterministic ranking; others: citations in
+order): Top-1/Top-3/MRR/precision/recall/F1 at line and function level, causal-verification rates on mutation-checked
+lines, single- vs multi-location faults; McNemar and paired bootstrap for E-to-E comparisons.
+Alternatives considered: (1) only judge-based correctness, which costs judge quota and was not validated for this
+task; (2) human labels, not available in the time left.
+Why: deterministic, free, and the same gold the main study used; reported as lower bounds.
+How we'd defend it in the viva: a hand-computed mini example is a unit test.
+Revisit if: human causal labels for the extension become available.

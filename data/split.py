@@ -4,6 +4,11 @@ Stratified by library and category with a fixed seed, so a re-run gives the same
 split. Prints the SHA-256 of the test file, which gate G2 records in
 PREREGISTRATION.md. Test questions are never used for tuning.
 
+Once a question has been in dev, it stays in dev (D-44). Its system outputs and
+judge labels have been looked at, so moving it into test would leak development
+into the test set. `data/dev_history.txt` lists every qid that has ever been in
+dev; each run reads it and adds the new dev questions to it.
+
 Usage: python data/split.py [--dev-size 20] [--input data/questions_all.jsonl]
 """
 
@@ -23,12 +28,17 @@ from core.config import REPO_ROOT, load_config  # noqa: E402
 from core.jsonl import read_jsonl, write_jsonl  # noqa: E402
 
 
-def stratified_split(questions: list[dict[str, Any]], dev_size: int, seed: int) -> tuple[list[dict], list[dict]]:
+def stratified_split(questions: list[dict[str, Any]], dev_size: int, seed: int,
+                     pinned_dev: set[str] | frozenset[str] = frozenset()) -> tuple[list[dict], list[dict]]:
     """Each (library, category) stratum gives dev questions in proportion to its size.
 
     Largest-remainder rounding makes the dev size exact. Within a stratum the
     order is a seeded shuffle of the questions sorted by qid, so the result
     does not depend on the input order.
+
+    `pinned_dev` (qids once in dev) always go to dev. Remaining dev slots go,
+    one at a time, to the stratum furthest below its proportional quota. If
+    more questions are pinned than `dev_size`, dev is larger than asked.
     """
     strata: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for q in sorted(questions, key=lambda q: q["qid"]):
@@ -45,10 +55,30 @@ def stratified_split(questions: list[dict[str, Any]], dev_size: int, seed: int) 
         take[k] += 1
     dev: list[dict] = []
     test: list[dict] = []
+    if not pinned_dev:
+        for key in sorted(strata):
+            dev += strata[key][: take[key]]
+            test += strata[key][take[key]:]
+        return sorted(dev, key=lambda q: q["qid"]), sorted(test, key=lambda q: q["qid"])
+    pinned = {k: [q for q in v if q["qid"] in pinned_dev] for k, v in strata.items()}
+    rest = {k: [q for q in v if q["qid"] not in pinned_dev] for k, v in strata.items()}
+    extra = {k: 0 for k in strata}
+    for _ in range(max(0, dev_size - sum(len(v) for v in pinned.values()))):
+        open_ = [k for k in strata if extra[k] < len(rest[k])]
+        if not open_:
+            break
+        k = min(open_, key=lambda k: (-(quotas[k] - len(pinned[k]) - extra[k]), k))
+        extra[k] += 1
     for key in sorted(strata):
-        dev += strata[key][: take[key]]
-        test += strata[key][take[key]:]
+        dev += pinned[key] + rest[key][: extra[key]]
+        test += rest[key][extra[key]:]
     return sorted(dev, key=lambda q: q["qid"]), sorted(test, key=lambda q: q["qid"])
+
+
+def read_history(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    return {line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()}
 
 
 def sha256_file(path: str | Path) -> str:
@@ -61,8 +91,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--input", default=str(REPO_ROOT / "data" / "questions_all.jsonl"))
     ap.add_argument("--dev-size", type=int, default=cfg["data"]["dev_size"])
     args = ap.parse_args(argv)
-    dev, test = stratified_split(read_jsonl(args.input), args.dev_size, cfg["data"]["split_seed"])
     data_dir = REPO_ROOT / "data"
+    history_path = data_dir / "dev_history.txt"
+    history = read_history(history_path)
+    dev, test = stratified_split(read_jsonl(args.input), args.dev_size, cfg["data"]["split_seed"], frozenset(history))
+    history_path.write_text("".join(f"{q}\n" for q in sorted(history | {q["qid"] for q in dev})), encoding="utf-8")
     write_jsonl(data_dir / "questions_dev.jsonl", dev)
     write_jsonl(data_dir / "questions_test.jsonl", test)
     print(f"dev={len(dev)} test={len(test)}\ntest SHA-256: {sha256_file(data_dir / 'questions_test.jsonl')}")

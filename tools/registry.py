@@ -120,7 +120,9 @@ class ToolRegistry:
         self.mutation_operators = mutation_operators
         self.counts = {"total": 0, "invalid": 0, "errors": 0, "recovered": 0, "probe_runs": 0, "mutant_runs": 0,
                        "mutation_checks": 0, "unsafe_attempts": 0, "repo_tests": 0}
+        self.read_only: tuple[str, ...] = self.READ_ONLY   # extended by add_tool (the extension's extra tools)
         self.mutation_log: dict[tuple[str, int], bool] = {}
+        self.untestable_lines: set[tuple[str, int]] = set()
         self._failed: set[str] = set()
         self._tools: dict[str, tuple[str, type[BaseModel], Callable[..., ToolResult]]] = {
             "search_code": ("Search the library's source code (BM25). Returns chunks with line numbers.",
@@ -149,6 +151,14 @@ class ToolRegistry:
             "run_repo_test": ("Run one of the repository's own tests in the sandbox by its pytest node id.",
                               RepoTestArgs, self._repo_test),
         }
+
+    def add_tool(self, name: str, description: str, model: type[BaseModel], fn: Callable[[Any], str], *,
+                 read_only: bool = True) -> None:
+        """Add or replace a tool. The multi-agent extension uses this for hybrid search and code-graph tools; the
+        locked systems never call it. A read-only tool costs an investigation step, like the built-in ones."""
+        self._tools[name] = (description, model, self._wrap(fn))
+        if read_only and name not in self.read_only:
+            self.read_only = self.read_only + (name,)
 
     # ---------------------------------------------------------------- specs
     def specs(self, names: tuple[str, ...] | list[str] | None = None) -> list[Any]:
@@ -210,6 +220,10 @@ class ToolRegistry:
                                 operators=self.mutation_operators or ALL_OPERATORS, tracer=self.tracer)
         if report.blocked:
             self.counts["unsafe_attempts"] += 1
+        elif getattr(report, "untestable", False):
+            # Not an error and not a verdict: nothing was run, so no check is spent (D-47). `getattr` because this
+            # file is pushed before tools/mutate.py (Sourav's bundle), whose older MutationReport has no such field.
+            self.untestable_lines.add((a.path, a.line))
         elif report.error is None:
             self.counts["mutation_checks"] += 1
             self.counts["mutant_runs"] += len(report.mutants)

@@ -33,6 +33,8 @@ def main(argv: list[str] | None = None) -> int:
                          "all systems have answered the same questions, so comparisons stay paired")
     ap.add_argument("--start", type=int, default=1, help="with --by-question: first limit to run")
     ap.add_argument("--daily-guard", type=int, help="override our own requests-per-day guard, to learn the server's real limit")
+    ap.add_argument("--qid-order", action="store_true", help="alphabetical qid order, as the `mid` run used")
+    ap.add_argument("--allow-test", action="store_true", help="passed to eval.run; needed for the locked test set")
     args = ap.parse_args(argv)
     status = 0
     limits = range(args.start, (args.limit or 20) + 1) if args.by_question else [args.limit]
@@ -40,7 +42,12 @@ def main(argv: list[str] | None = None) -> int:
         for system in args.systems:
             extra = ["--limit", str(limit)] if limit else []
             extra += ["--daily-guard", str(args.daily_guard)] if args.daily_guard else []
-            if run.main(["--system", system, "--split", args.split, "--run-id", args.run_id, *extra]) == run.EXIT_QUOTA:
+            extra += ["--qid-order"] if args.qid_order else []
+            extra += ["--allow-test"] if args.allow_test else []
+            code = run.main(["--system", system, "--split", args.split, "--run-id", args.run_id, *extra])
+            if code == run.EXIT_REFUSED:
+                return code  # nothing ran; don't judge or report
+            if code == run.EXIT_QUOTA:
                 status = run.EXIT_QUOTA
                 break
         if status:
