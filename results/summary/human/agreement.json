@@ -1,0 +1,27 @@
+{
+ "labellers": [
+  "labeller1",
+  "labeller2"
+ ],
+ "items_labelled_by_both": 72,
+ "items_with_judgement": 72,
+ "threshold": 0.6,
+ "kappa": {
+  "answer": {
+   "human_human": 0.742,
+   "labeller1_judge": 0.427,
+   "labeller2_judge": 0.412,
+   "consensus_judge": 0.363,
+   "n": 72,
+   "use_human_labels": true
+  },
+  "citation": {
+   "human_human": 0.902,
+   "labeller1_judge": 0.352,
+   "labeller2_judge": 0.306,
+   "consensus_judge": 0.322,
+   "n": 204,
+   "use_human_labels": true
+  }
+ }
+}

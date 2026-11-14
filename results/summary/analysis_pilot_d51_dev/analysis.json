@@ -1,0 +1,886 @@
+{
+ "hypotheses": {
+  "H1": {
+   "comparison": {
+    "n": 17,
+    "a_rate": 0.35294117647058826,
+    "b_rate": 0.5882352941176471,
+    "only_a": 1,
+    "only_b": 5,
+    "discordant": 6,
+    "p_value": 0.21875,
+    "diff": -0.23529411764705882,
+    "ci_low": -0.47058823529411764,
+    "ci_high": 0.0
+   },
+   "verdict": "inconclusive (95% CI includes zero)",
+   "decomposition_correctness": {
+    "n": 17,
+    "a_rate": 0.7058823529411765,
+    "b_rate": 0.6470588235294118,
+    "only_a": 3,
+    "only_b": 2,
+    "discordant": 5,
+    "p_value": 1.0,
+    "diff": 0.058823529411764705,
+    "ci_low": -0.17647058823529413,
+    "ci_high": 0.29411764705882354
+   }
+  },
+  "H2": {
+   "confident_error_ours": 0.23529411764705882,
+   "confident_error_b2": 0.35294117647058826,
+   "relative_reduction": 0.33333333333333337,
+   "coverage_ours": 0.8823529411764706,
+   "coverage_b2": 1.0,
+   "comparison": {
+    "n": 17,
+    "a_rate": 0.23529411764705882,
+    "b_rate": 0.35294117647058826,
+    "only_a": 2,
+    "only_b": 4,
+    "discordant": 6,
+    "p_value": 0.6875,
+    "diff": -0.11764705882352941,
+    "ci_low": -0.4117647058823529,
+    "ci_high": 0.17647058823529413
+   },
+   "verdict": "inconclusive (95% CI of the difference includes zero)"
+  },
+  "H3": {
+   "label_source": "judge labels (provisional until G3)",
+   "comparison": {
+    "n_questions": 17,
+    "a_precision": 0.5272727272727272,
+    "b_precision": 0.6304347826086957,
+    "diff": -0.10316205533596845,
+    "ci_low": -0.29608880921966396,
+    "ci_high": 0.05061832114038734,
+    "a_citations": 55,
+    "b_citations": 46
+   },
+   "verdict": "inconclusive (95% CI includes zero)"
+  }
+ },
+ "human": null,
+ "per_category": {
+  "ours": {
+   "doc_related": {
+    "n": 9,
+    "n_judged": 9,
+    "correctness": 0.5555555555555556,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 3
+   },
+   "single_location": {
+    "n": 7,
+    "n_judged": 7,
+    "correctness": 0.8571428571428571,
+    "causally_supported": 0.2857142857142857,
+    "confident_errors": 1
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  },
+  "b1": {
+   "doc_related": {
+    "n": 9,
+    "n_judged": 9,
+    "correctness": 0.4444444444444444,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 5
+   },
+   "single_location": {
+    "n": 7,
+    "n_judged": 7,
+    "correctness": 0.42857142857142855,
+    "causally_supported": 0.14285714285714285,
+    "confident_errors": 4
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  },
+  "b2": {
+   "doc_related": {
+    "n": 9,
+    "n_judged": 9,
+    "correctness": 0.5555555555555556,
+    "causally_supported": 0.5555555555555556,
+    "confident_errors": 4
+   },
+   "single_location": {
+    "n": 7,
+    "n_judged": 7,
+    "correctness": 0.7142857142857143,
+    "causally_supported": 0.5714285714285714,
+    "confident_errors": 2
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  },
+  "a1": {
+   "doc_related": {
+    "n": 9,
+    "n_judged": 9,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 3
+   },
+   "single_location": {
+    "n": 7,
+    "n_judged": 7,
+    "correctness": 1.0,
+    "causally_supported": 0.42857142857142855,
+    "confident_errors": 0
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  },
+  "a2": {
+   "doc_related": {
+    "n": 9,
+    "n_judged": 9,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 2
+   },
+   "single_location": {
+    "n": 7,
+    "n_judged": 7,
+    "correctness": 0.8571428571428571,
+    "causally_supported": 0.42857142857142855,
+    "confident_errors": 1
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  },
+  "a3": {
+   "doc_related": {
+    "n": 9,
+    "n_judged": 9,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.5555555555555556,
+    "confident_errors": 2
+   },
+   "single_location": {
+    "n": 7,
+    "n_judged": 7,
+    "correctness": 0.7142857142857143,
+    "causally_supported": 0.5714285714285714,
+    "confident_errors": 2
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  }
+ },
+ "per_library": {
+  "ours": {
+   "click": {
+    "n": 15,
+    "n_judged": 15,
+    "correctness": 0.7333333333333333,
+    "causally_supported": 0.4,
+    "confident_errors": 3
+   },
+   "marshmallow": {
+    "n": 2,
+    "n_judged": 2,
+    "correctness": 0.5,
+    "causally_supported": 0.0,
+    "confident_errors": 1
+   }
+  },
+  "b1": {
+   "click": {
+    "n": 15,
+    "n_judged": 15,
+    "correctness": 0.4666666666666667,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 8
+   },
+   "marshmallow": {
+    "n": 2,
+    "n_judged": 2,
+    "correctness": 0.5,
+    "causally_supported": 0.0,
+    "confident_errors": 1
+   }
+  },
+  "b2": {
+   "click": {
+    "n": 15,
+    "n_judged": 15,
+    "correctness": 0.6,
+    "causally_supported": 0.5333333333333333,
+    "confident_errors": 6
+   },
+   "marshmallow": {
+    "n": 2,
+    "n_judged": 2,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  },
+  "a1": {
+   "click": {
+    "n": 15,
+    "n_judged": 15,
+    "correctness": 0.8,
+    "causally_supported": 0.4,
+    "confident_errors": 3
+   },
+   "marshmallow": {
+    "n": 2,
+    "n_judged": 2,
+    "correctness": 1.0,
+    "causally_supported": 0.5,
+    "confident_errors": 0
+   }
+  },
+  "a2": {
+   "click": {
+    "n": 15,
+    "n_judged": 15,
+    "correctness": 0.7333333333333333,
+    "causally_supported": 0.4,
+    "confident_errors": 3
+   },
+   "marshmallow": {
+    "n": 2,
+    "n_judged": 2,
+    "correctness": 1.0,
+    "causally_supported": 0.5,
+    "confident_errors": 0
+   }
+  },
+  "a3": {
+   "click": {
+    "n": 15,
+    "n_judged": 15,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.5333333333333333,
+    "confident_errors": 4
+   },
+   "marshmallow": {
+    "n": 2,
+    "n_judged": 2,
+    "correctness": 1.0,
+    "causally_supported": 1.0,
+    "confident_errors": 0
+   }
+  }
+ },
+ "rq2": {
+  "checks": 95,
+  "untestable": 18,
+  "untestable_in_gold": 0,
+  "rules": {
+   "any_flip": {
+    "n": 77,
+    "accepted": 62,
+    "accepted_in_gold": 28,
+    "precision_vs_fix_lines": 0.45161290322580644,
+    "recall_vs_fix_lines": 0.8235294117647058,
+    "kappa_vs_fix_lines": 0.03
+   },
+   "behavioural": {
+    "n": 77,
+    "accepted": 57,
+    "accepted_in_gold": 27,
+    "precision_vs_fix_lines": 0.47368421052631576,
+    "recall_vs_fix_lines": 0.7941176470588235,
+    "kappa_vs_fix_lines": 0.09
+   },
+   "specific": {
+    "n": 77,
+    "accepted": 27,
+    "accepted_in_gold": 6,
+    "precision_vs_fix_lines": 0.2222222222222222,
+    "recall_vs_fix_lines": 0.17647058823529413,
+    "kappa_vs_fix_lines": -0.319
+   }
+  }
+ },
+ "taxonomy": {
+  "ours": {
+   "wrong behaviour and wrong place": 3,
+   "correct, causally supported": 6,
+   "correct, not causally supported": 6,
+   "right behaviour, wrong place": 1,
+   "right place, wrong or partial behaviour": 1
+  },
+  "b1": {
+   "right behaviour, wrong place": 6,
+   "wrong behaviour and wrong place": 2,
+   "correct, causally supported": 5,
+   "correct, not causally supported": 3,
+   "right place, wrong or partial behaviour": 1
+  },
+  "b2": {
+   "correct, not causally supported": 1,
+   "correct, causally supported": 10,
+   "wrong behaviour and wrong place": 1,
+   "right place, wrong or partial behaviour": 2,
+   "right behaviour, wrong place": 3
+  },
+  "a1": {
+   "correct, not causally supported": 7,
+   "correct, causally supported": 7,
+   "wrong behaviour and wrong place": 1,
+   "right behaviour, wrong place": 2
+  },
+  "a2": {
+   "right place, wrong or partial behaviour": 1,
+   "correct, causally supported": 7,
+   "correct, not causally supported": 6,
+   "wrong behaviour and wrong place": 1,
+   "right behaviour, wrong place": 2
+  },
+  "a3": {
+   "wrong behaviour and wrong place": 2,
+   "correct, not causally supported": 2,
+   "correct, causally supported": 10,
+   "right place, wrong or partial behaviour": 1,
+   "right behaviour, wrong place": 2
+  }
+ },
+ "cases": [
+  {
+   "qid": "click-1075",
+   "winner": "b2",
+   "title": "Add newlines between options in help text",
+   "ours_label": "incorrect",
+   "b2_label": "correct",
+   "ours_reason": "The answer does not identify the missing blank line after multiline option help nor locate the cause in the correct code region that the fix changed.",
+   "b2_reason": "The answer correctly identifies that the frozen HelpFormatter.write_dl lacks extra newlines after multi\u2011line help, matching the failing test, and points to the relevant code in formatting.py."
+  },
+  {
+   "qid": "click-1597",
+   "winner": "ours",
+   "title": "get help does not remove multiline marker",
+   "ours_label": "correct",
+   "b2_label": "incorrect",
+   "ours_reason": "The answer correctly identifies the failing behavior and points to make_default_short_help in utils as the source of the issue.",
+   "b2_reason": "The answer claims the frozen code correctly removes the \\b marker via formatting.py, which contradicts the gold description that the marker is not removed and the cause is in utils.make_default_short_help"
+  },
+  {
+   "qid": "click-2522",
+   "winner": "ours",
+   "title": "`CliRunner`: restrict `mix_stderr` influence to `<output>`; keep `<stderr>` and `<stdout>` stable",
+   "ours_label": "correct",
+   "b2_label": "incorrect",
+   "ours_reason": "The answer correctly identifies the frozen code's behavior and points to the exact lines that cause it.",
+   "b2_reason": "The answer misdescribes the frozen code's behavior for mix_stderr=False and does not identify the actual cause of the mixing bug"
+  },
+  {
+   "qid": "click-2703",
+   "winner": "ours",
+   "title": "zsh completion still misbehaving in the presence of `:`",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "The answer correctly identifies the colon\u2011splitting behavior and points to the format_completion implementation (line\u202f376) as the cause, matching the gold description.",
+   "b2_reason": "Identifies the observed colon-splitting behavior but points to the wrong code location as the cause"
+  },
+  {
+   "qid": "marshmallow-1808",
+   "winner": "b2",
+   "title": "3.12 no longer supports fields named `parent`",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the same None root failure but attributes it to a naming conflict rather than the missing root attribute added by the fix",
+   "b2_reason": "Answer correctly identifies the failing root being None and points to the root property implementation that causes it"
+  }
+ ],
+ "ablations": [
+  {
+   "id": "A1",
+   "prediction": "More confident errors on doc-related questions",
+   "observed": "doc-related confident errors: A1 3, ours 3",
+   "as_predicted": "no"
+  },
+  {
+   "id": "A2",
+   "prediction": "Similar correctness; clearly lower causal citation precision",
+   "observed": "correctness A2 76.5%, ours 70.6%; precision vs fix lines (lower bound) A2 37.0%, ours 29.1%",
+   "as_predicted": "see H3"
+  },
+  {
+   "id": "A3",
+   "prediction": "Fewer confident errors than B2, lower correctness than ours",
+   "observed": "confident errors A3 23.5%, B2 35.3%; correctness A3 70.6%, ours 70.6%",
+   "as_predicted": "no"
+  },
+  {
+   "id": "A4",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A5",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A6",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A7",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A8",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A9",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A10",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A11",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  }
+ ],
+ "comparisons": {
+  "b1:causally_supported": {
+   "n": 17,
+   "a_rate": 0.35294117647058826,
+   "b_rate": 0.29411764705882354,
+   "only_a": 2,
+   "only_b": 1,
+   "discordant": 3,
+   "p_value": 1.0,
+   "diff": 0.058823529411764705,
+   "ci_low": -0.11764705882352941,
+   "ci_high": 0.23529411764705882
+  },
+  "b1:correct": {
+   "n": 17,
+   "a_rate": 0.7058823529411765,
+   "b_rate": 0.47058823529411764,
+   "only_a": 4,
+   "only_b": 0,
+   "discordant": 4,
+   "p_value": 0.125,
+   "diff": 0.23529411764705882,
+   "ci_low": 0.058823529411764705,
+   "ci_high": 0.47058823529411764
+  },
+  "b1:confident_error": {
+   "n": 17,
+   "a_rate": 0.23529411764705882,
+   "b_rate": 0.5294117647058824,
+   "only_a": 0,
+   "only_b": 5,
+   "discordant": 5,
+   "p_value": 0.0625,
+   "diff": -0.29411764705882354,
+   "ci_low": -0.5294117647058824,
+   "ci_high": -0.11764705882352941
+  },
+  "b1:fix_location_hit": {
+   "n": 17,
+   "a_rate": 0.5294117647058824,
+   "b_rate": 0.29411764705882354,
+   "only_a": 6,
+   "only_b": 2,
+   "discordant": 8,
+   "p_value": 0.2890625,
+   "diff": 0.23529411764705882,
+   "ci_low": -0.058823529411764705,
+   "ci_high": 0.5294117647058824
+  },
+  "b2:causally_supported": {
+   "n": 17,
+   "a_rate": 0.35294117647058826,
+   "b_rate": 0.5882352941176471,
+   "only_a": 1,
+   "only_b": 5,
+   "discordant": 6,
+   "p_value": 0.21875,
+   "diff": -0.23529411764705882,
+   "ci_low": -0.47058823529411764,
+   "ci_high": 0.0
+  },
+  "b2:correct": {
+   "n": 17,
+   "a_rate": 0.7058823529411765,
+   "b_rate": 0.6470588235294118,
+   "only_a": 3,
+   "only_b": 2,
+   "discordant": 5,
+   "p_value": 1.0,
+   "diff": 0.058823529411764705,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.29411764705882354
+  },
+  "b2:confident_error": {
+   "n": 17,
+   "a_rate": 0.23529411764705882,
+   "b_rate": 0.35294117647058826,
+   "only_a": 2,
+   "only_b": 4,
+   "discordant": 6,
+   "p_value": 0.6875,
+   "diff": -0.11764705882352941,
+   "ci_low": -0.4117647058823529,
+   "ci_high": 0.17647058823529413
+  },
+  "b2:fix_location_hit": {
+   "n": 17,
+   "a_rate": 0.5294117647058824,
+   "b_rate": 0.6470588235294118,
+   "only_a": 1,
+   "only_b": 3,
+   "discordant": 4,
+   "p_value": 0.625,
+   "diff": -0.11764705882352941,
+   "ci_low": -0.35294117647058826,
+   "ci_high": 0.11764705882352941
+  },
+  "a1:causally_supported": {
+   "n": 17,
+   "a_rate": 0.35294117647058826,
+   "b_rate": 0.4117647058823529,
+   "only_a": 0,
+   "only_b": 1,
+   "discordant": 1,
+   "p_value": 1.0,
+   "diff": -0.058823529411764705,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.0
+  },
+  "a1:correct": {
+   "n": 17,
+   "a_rate": 0.7058823529411765,
+   "b_rate": 0.8235294117647058,
+   "only_a": 0,
+   "only_b": 2,
+   "discordant": 2,
+   "p_value": 0.5,
+   "diff": -0.11764705882352941,
+   "ci_low": -0.29411764705882354,
+   "ci_high": 0.0
+  },
+  "a1:confident_error": {
+   "n": 17,
+   "a_rate": 0.23529411764705882,
+   "b_rate": 0.17647058823529413,
+   "only_a": 2,
+   "only_b": 1,
+   "discordant": 3,
+   "p_value": 1.0,
+   "diff": 0.058823529411764705,
+   "ci_low": -0.11764705882352941,
+   "ci_high": 0.23529411764705882
+  },
+  "a1:fix_location_hit": {
+   "n": 17,
+   "a_rate": 0.5294117647058824,
+   "b_rate": 0.5882352941176471,
+   "only_a": 0,
+   "only_b": 1,
+   "discordant": 1,
+   "p_value": 1.0,
+   "diff": -0.058823529411764705,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.0
+  },
+  "a2:causally_supported": {
+   "n": 17,
+   "a_rate": 0.35294117647058826,
+   "b_rate": 0.4117647058823529,
+   "only_a": 1,
+   "only_b": 2,
+   "discordant": 3,
+   "p_value": 1.0,
+   "diff": -0.058823529411764705,
+   "ci_low": -0.23529411764705882,
+   "ci_high": 0.11764705882352941
+  },
+  "a2:correct": {
+   "n": 17,
+   "a_rate": 0.7058823529411765,
+   "b_rate": 0.7647058823529411,
+   "only_a": 0,
+   "only_b": 1,
+   "discordant": 1,
+   "p_value": 1.0,
+   "diff": -0.058823529411764705,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.0
+  },
+  "a2:confident_error": {
+   "n": 17,
+   "a_rate": 0.23529411764705882,
+   "b_rate": 0.17647058823529413,
+   "only_a": 1,
+   "only_b": 0,
+   "discordant": 1,
+   "p_value": 1.0,
+   "diff": 0.058823529411764705,
+   "ci_low": 0.0,
+   "ci_high": 0.17647058823529413
+  },
+  "a2:fix_location_hit": {
+   "n": 17,
+   "a_rate": 0.5294117647058824,
+   "b_rate": 0.5882352941176471,
+   "only_a": 0,
+   "only_b": 1,
+   "discordant": 1,
+   "p_value": 1.0,
+   "diff": -0.058823529411764705,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.0
+  },
+  "a3:causally_supported": {
+   "n": 17,
+   "a_rate": 0.35294117647058826,
+   "b_rate": 0.5882352941176471,
+   "only_a": 1,
+   "only_b": 5,
+   "discordant": 6,
+   "p_value": 0.21875,
+   "diff": -0.23529411764705882,
+   "ci_low": -0.47058823529411764,
+   "ci_high": 0.0
+  },
+  "a3:correct": {
+   "n": 17,
+   "a_rate": 0.7058823529411765,
+   "b_rate": 0.7058823529411765,
+   "only_a": 1,
+   "only_b": 1,
+   "discordant": 2,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.17647058823529413
+  },
+  "a3:confident_error": {
+   "n": 17,
+   "a_rate": 0.23529411764705882,
+   "b_rate": 0.23529411764705882,
+   "only_a": 1,
+   "only_b": 1,
+   "discordant": 2,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": -0.17647058823529413,
+   "ci_high": 0.17647058823529413
+  },
+  "a3:fix_location_hit": {
+   "n": 17,
+   "a_rate": 0.5294117647058824,
+   "b_rate": 0.5294117647058824,
+   "only_a": 0,
+   "only_b": 0,
+   "discordant": 0,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": 0.0,
+   "ci_high": 0.0
+  }
+ },
+ "tool_use": {
+  "ours": {
+   "tool_calls": 417,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 1,
+   "recovered": 1,
+   "recovery_rate": 1.0,
+   "probe_outcomes": {
+    "pass": 50,
+    "fail": 12,
+    "error": 7,
+    "blocked": 1
+   },
+   "probes_submitted": 70,
+   "probe_verdict_rate": 0.8985507246376812,
+   "unsafe_attempts": 1,
+   "questions_with_unsafe": 1,
+   "unsafe_attempt_rate": 0.014285714285714285,
+   "blocked_rules": {
+    "blocked_import": 1
+   },
+   "unsafe_executed": 0
+  },
+  "b1": {
+   "tool_calls": 17,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 0,
+   "recovered": 0,
+   "recovery_rate": null,
+   "probe_outcomes": {},
+   "probes_submitted": 0,
+   "probe_verdict_rate": null,
+   "unsafe_attempts": 0,
+   "questions_with_unsafe": 0,
+   "unsafe_attempt_rate": null,
+   "blocked_rules": {},
+   "unsafe_executed": 0
+  },
+  "b2": {
+   "tool_calls": 167,
+   "invalid": 1,
+   "valid_call_rate": 0.9940119760479041,
+   "errors": 7,
+   "recovered": 0,
+   "recovery_rate": 0.0,
+   "probe_outcomes": {
+    "pass": 44,
+    "fail": 6,
+    "error": 5,
+    "budget": 6,
+    "blocked": 1
+   },
+   "probes_submitted": 56,
+   "probe_verdict_rate": 0.9090909090909091,
+   "unsafe_attempts": 1,
+   "questions_with_unsafe": 1,
+   "unsafe_attempt_rate": 0.017857142857142856,
+   "blocked_rules": {
+    "blocked_import": 1
+   },
+   "unsafe_executed": 0
+  },
+  "a1": {
+   "tool_calls": 130,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 0,
+   "recovered": 0,
+   "recovery_rate": null,
+   "probe_outcomes": {},
+   "probes_submitted": 0,
+   "probe_verdict_rate": null,
+   "unsafe_attempts": 0,
+   "questions_with_unsafe": 0,
+   "unsafe_attempt_rate": null,
+   "blocked_rules": {},
+   "unsafe_executed": 0
+  },
+  "a2": {
+   "tool_calls": 237,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 1,
+   "recovered": 1,
+   "recovery_rate": 1.0,
+   "probe_outcomes": {
+    "pass": 44,
+    "fail": 11,
+    "error": 7,
+    "blocked": 1
+   },
+   "probes_submitted": 63,
+   "probe_verdict_rate": 0.8870967741935484,
+   "unsafe_attempts": 1,
+   "questions_with_unsafe": 1,
+   "unsafe_attempt_rate": 0.015873015873015872,
+   "blocked_rules": {
+    "blocked_import": 1
+   },
+   "unsafe_executed": 0
+  },
+  "a3": {
+   "tool_calls": 223,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 1,
+   "recovered": 1,
+   "recovery_rate": 1.0,
+   "probe_outcomes": {
+    "pass": 36,
+    "fail": 8,
+    "error": 3,
+    "blocked": 1
+   },
+   "probes_submitted": 48,
+   "probe_verdict_rate": 0.9361702127659575,
+   "unsafe_attempts": 1,
+   "questions_with_unsafe": 1,
+   "unsafe_attempt_rate": 0.020833333333333332,
+   "blocked_rules": {
+    "blocked_import": 1
+   },
+   "unsafe_executed": 0
+  }
+ },
+ "questions": [
+  "click-1075",
+  "click-1193",
+  "click-1287",
+  "click-1597",
+  "click-1708",
+  "click-1749",
+  "click-1791",
+  "click-1821",
+  "click-2040",
+  "click-2522",
+  "click-2703",
+  "click-2809",
+  "click-3099",
+  "click-3449",
+  "click-461",
+  "marshmallow-1808",
+  "marshmallow-2249"
+ ],
+ "figures": [
+  "fig_comparisons.png",
+  "fig_categories.png",
+  "fig_risk_coverage.png"
+ ]
+}

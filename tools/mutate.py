@@ -273,6 +273,9 @@ class MutationReport:
     blocked: bool = False
     violations: list[dict[str, Any]] = field(default_factory=list)
     error: str | None = None
+    # No operator applies to the line (a `def`, `for`, `else:` or continuation line). Neither causal nor
+    # non-causal: the check cannot say, so the line must not be counted as rejected (D-47).
+    untestable: bool = False
 
     @property
     def causal(self) -> bool:
@@ -313,7 +316,9 @@ def _outcomes(raw: dict[str, Any]) -> tuple[dict | None, list[dict | None]]:
 
 def _make_overlay(session: Any, files: dict[str, str]) -> tuple[Path, str]:
     """Copy only the package directory into scratch, then write the mutated files."""
-    host = session.scratch / "mutants" / uuid.uuid4().hex[:12]
+    # Deterministic name (D-52): a mutant's path can appear in a traceback that a probe returns.
+    name = session.next_name() if hasattr(session, "next_name") else uuid.uuid4().hex[:12]
+    host = session.scratch / "mutants" / name
     src_pkg = session.tree / session.source_root / session.package
     shutil.copytree(src_pkg, host / session.package, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     for rel, code in files.items():
@@ -332,7 +337,7 @@ def _run_variants(session: Any, report: MutationReport, variants: list[tuple[dic
     raw = session.run_probes(named)
     report.original_claim, report.original_controls = _outcomes(raw)
     flags_all = []
-    for files, locs, ops, desc in variants:
+    for index, (files, locs, ops, desc) in enumerate(variants, 1):
         host, inner = _make_overlay(session, files)
         try:
             claim, controls = _outcomes(session.run_probes(named, overlay=inner))
@@ -340,7 +345,7 @@ def _run_variants(session: Any, report: MutationReport, variants: list[tuple[dic
             shutil.rmtree(host, ignore_errors=True)
         flags = classify(report.original_claim, report.original_controls, claim, controls, locs)
         flags_all.append(flags)
-        report.mutants.append(MutantResult(uuid.uuid4().hex[:8], locs, ops, desc, claim, controls, flags))
+        report.mutants.append(MutantResult(f"m{index:03d}", locs, ops, desc, claim, controls, flags))
     report.verdicts = verdicts(flags_all)
     if tracer is not None:
         tracer.write("mutation_check", locs=report.locs, n_mutants=len(report.mutants), verdicts=report.verdicts)
@@ -370,7 +375,9 @@ def mutate_and_run(session: Any, rel_path: str, line: int, claim_probe: str, con
     source = _read(session, rel)
     mutants = generate_mutants(source, line, rel, operators=operators, limit=max_mutants)
     if not mutants:
-        report.error = f"no mutants: nothing on {rel}:{line} can be mutated (blank, comment, or unsupported)"
+        report.untestable = True
+        if tracer is not None:
+            tracer.write("mutation_check", locs=report.locs, n_mutants=0, untestable=True)
         return report
     variants = [({rel: m.code}, [m.loc], [m.operator], m.description) for m in mutants]
     return _run_variants(session, report, variants, named, tracer)
@@ -453,6 +460,9 @@ def render(report: MutationReport) -> str:
         return "BLOCKED by the sandbox policy; nothing was run."
     if report.error:
         return f"MUTATION ERROR: {report.error}"
+    if report.untestable:
+        return (f"{', '.join(report.locs)}: UNTESTABLE. No mutation operator applies to this line (for example a "
+                "`def`, `for`, `else:` or continuation line), so the check can neither confirm nor reject it.")
     where = ", ".join(report.locs)
     verdict = "CAUSAL (a mutant changed the claim's outcome and left every control unchanged)" if report.causal \
         else "NOT CAUSAL"
