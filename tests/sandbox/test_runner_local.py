@@ -73,3 +73,16 @@ def test_pytest_job(local):
     assert out["tests"]["tests/test_double.py::test_ok"]["status"] == "passed"
     bad = out["tests"]["tests/test_double.py::test_bad"]
     assert bad["status"] == "failed" and "assert 4 == 5" in bad["message"]
+
+
+def test_job_paths_are_deterministic(fakelib_tree):
+    """D-52: two fresh sessions give the same job paths in the same order, so a probe that prints its own traceback
+    sends the model the same text on a replay (the LLM cache then hits)."""
+    names = []
+    for _ in range(2):
+        s = LocalBackend(fakelib_tree, "fakelib", trusted=True)
+        try:
+            names.append([s.job_dir()[0].name, s.job_dir()[0].name, s.next_name()])
+        finally:
+            s.cleanup()
+    assert names[0] == names[1] == ["0001", "0002", "0003"]

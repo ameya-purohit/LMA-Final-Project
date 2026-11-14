@@ -12,4 +12,4 @@ Work step by step: decide what you need to know next, call a tool, read the resu
 - mutate_and_run: test whether a cited line is causal, by mutating it in a throw-away copy and re-running a probe and its controls.
 - run_repo_test: run one of the repository's own tests.
 
-Then call final_answer with your answer and its atomic claims (at most 5); each claim should cite the file path and the single line that decides it, and report any observed output. If you are unsure, set flagged_uncertain=true; if you cannot answer, set abstained=true.
+Then call final_answer with your answer and its atomic claims (at most 5); each claim must cite the file path and the single line that decides it, and report any observed output. If you are unsure, set flagged_uncertain=true; if you cannot answer, set abstained=true.

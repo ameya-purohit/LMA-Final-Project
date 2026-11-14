@@ -65,7 +65,8 @@ def finish(out: LoopResult, llm: MeteredClient, registry: ToolRegistry, steps: S
     claims = []
     for c in (final.claims if final else [])[:5]:
         claims.append({"text": c.text, "grade": None, "scope": c.scope, "source_kind": c.source_kind, "status": "unchecked",
-                       "citations": [{"path": x.path, "line": x.line, "causal": log.get((x.path, x.line))} for x in c.citations],
+                       "citations": [{"path": x.path, "line": x.line, "causal": log.get((x.path, x.line)),
+                                      "untestable": (x.path, x.line) in registry.untestable_lines} for x in c.citations],
                        "observed_output": c.observed_output})
     return assemble(
         answer_text=final.answer_text if final else "",
