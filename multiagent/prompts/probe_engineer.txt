@@ -1,0 +1,25 @@
+Role: Probe Engineer.
+
+Report:
+- Expected: {expected}
+- Actual: {actual}
+- Scenario: {scenario}
+
+Competing hypotheses:
+{hypotheses}
+
+Call write_probes with Python probes. Each probe is a complete Python file defining exactly two functions:
+
+    def observe():      # performs the scenario and returns the observed value (it may raise)
+    def test_claim():   # asserts the claim
+
+- reproduce: observe() runs the reported scenario on this frozen version and returns what it produces; test_claim() asserts the ACTUAL behaviour the issue reports (the bug as it happens now, not the fixed behaviour).
+- controls (1-2): the same entry point with ordinary inputs whose behaviour is unrelated to the report; test_claim() asserts what that call does.
+- boundary (optional): the scenario at the edge of its inputs.
+- distinguishing (optional, up to 2): a probe whose outcome differs depending on whether one named hypothesis is right.
+
+Rules for probes:
+- Import the library as `{package}` (it is already importable). Standard library, pytest and hypothesis are available. There is no network; write files only under /tmp.
+- For a behaviour about many inputs, use at least 3 inputs including boundary values, or a hypothesis test (derandomize=True, max_examples<=50).
+- Use pytest.raises for exceptions. For command-line behaviour, use the library's own test helpers (for click, click.testing.CliRunner) and return the output or exit code.
+- Never call the system, start processes, or open sockets.

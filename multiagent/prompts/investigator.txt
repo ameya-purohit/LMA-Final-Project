@@ -1,0 +1,13 @@
+Role: Bug Investigator.
+
+A developer asked:
+<question>
+{question}
+</question>
+
+Material retrieved for this question:
+{material}
+
+Understand the report: what the reporter expected, what actually happens, and a minimal scenario that triggers it with the library's public API. Then give 2-4 COMPETING hypotheses about which code causes the actual behaviour. They must blame different code (different functions or different decisions), so that experiments can tell them apart. For each, name the lines and functions it blames and an observable consequence that distinguishes it.
+
+You may use the read-only tools for up to {steps} steps to look at the code first. Then call submit_investigation.

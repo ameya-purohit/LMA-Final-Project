@@ -23,7 +23,9 @@ drives these stages:
 4. **Handle refutations.** `assess_refutation` compares the probe's setup with the question. Different setup: rewrite
    the probe. Same setup: the claim is refuted, and the observed output becomes the goal for `revise_claim`.
 5. **Flip the switch.** Each citation of a confirmed claim goes through `mutate_and_run`. If one is causal, the others are
-   dropped. If none is, the goal becomes "find the line that decides this", through `propose_citation`.
+   dropped. If none is, the goal becomes "find the line that decides this", through `propose_citation` (two tries).
+   If both tries are rejected and the claim had no citation, it keeps the last proposed line, marked not causal
+   (D-51), so the answer still says where the agent looked, just as a rejected drafted line is kept.
 6. **Vacuity.** A confirmed claim with no causal citation has its probe checked. If no mutation can change the probe's
    outcome, the probe tests nothing, so it is regenerated once.
 7. **Grade** by rule: [E+C], [E], [T], [R], [D]. No LLM decides a grade.
@@ -46,6 +48,9 @@ cites line 12 has that citation rejected and the agent proposes line 88, which p
 - **Tokens.** One running history makes later requests large (about 150,000 tokens on the first dev question). We accept
   this because requests are scarcer than tokens on the free tier.
 - **Citation of a whole-file claim.** Claims like "this function is used" can pass the mutation check while saying little.
+- **Untestable citations** (D-47). If a cited line has nothing to mutate, the check gives no verdict. The agent keeps
+  the line and the claim stays [E]. It searches for another line only when at least one citation was actually rejected,
+  so these lines no longer waste requests.
 - **Requests.** Non-causal citations can use several extra turns; the 25-request cap can end the checks early, and any
   unverified claim is then flagged.
 

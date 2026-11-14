@@ -95,7 +95,8 @@ class ToolLoop:
             if self.llm.remaining <= reserve:
                 result.stopped_by = "requests"
                 return result
-            allowed = [t for t in tools if steps.left > 0 or t not in ToolRegistry.READ_ONLY]
+            read_only = getattr(self.registry, "read_only", ToolRegistry.READ_ONLY)
+            allowed = [t for t in tools if steps.left > 0 or t not in read_only]
             specs = self.registry.specs(allowed) + [tool_spec(n, d, m) for n, (d, m) in terminals.items()]
             names = allowed + list(terminals)
             reply = self.llm.complete(history, specs, force_tool=True, allowed_tools=names)
@@ -129,7 +130,7 @@ class ToolLoop:
                     history.append(self._tool_msg(call, "Skipped: too many tool calls in one turn."))
                 else:
                     out = self.registry.call(call.name, call.arguments)
-                    used_step = used_step or call.name in ToolRegistry.READ_ONLY
+                    used_step = used_step or call.name in read_only
                     history.append(self._tool_msg(call, out.text))
             if used_step:
                 steps.used += 1

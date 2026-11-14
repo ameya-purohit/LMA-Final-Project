@@ -11,6 +11,15 @@
    `docs/quota.md`, because Google no longer publishes free-tier limits.
 5. Store the reply in the cache and write a trace record with token counts.
 
+Several API keys for one provider (`key_envs` in the role's config, D-50): each key
+has its own daily counter and limit. Requests use the first key that still has
+quota today; when a key's daily limit is reached (our guard or the server's
+per-day 429), the next key is used. Only when every key is used up does
+`QuotaExhausted` stop the run. The model, prompts and cache are the same for
+every key (the cache key never contains the API key), so which key served a
+request cannot change an answer. Keys are read from `.env` and never logged;
+traces record only the key's slot number.
+
 Why one client: fairness (CLAUDE.md §2.3). Every system gets identical
 caching, pacing, retries and logging, so none is advantaged by plumbing.
 """
@@ -35,19 +44,27 @@ from llm.types import LLMError, Message, QuotaExhausted, RateLimited, Reply, Too
 QUOTA_TZ = ZoneInfo("America/Los_Angeles")
 
 
-def make_provider(name: str) -> Any:
+def make_provider(name: str, key_env: str | None = None) -> Any:
     """Build a real provider. Imported lazily so tests never need SDKs or keys."""
     from core.env import require_key
     if name == "gemini":
         from llm.providers.gemini import GeminiProvider
-        return GeminiProvider(require_key("GEMINI_API_KEY"))
+        return GeminiProvider(require_key(key_env or "GEMINI_API_KEY"))
     if name == "groq":
         from llm.providers.groq import GroqProvider
-        return GroqProvider(require_key("GROQ_API_KEY"))
+        return GroqProvider(require_key(key_env or "GROQ_API_KEY"))
     if name == "mistral":
         from llm.providers.mistral import MistralProvider
-        return MistralProvider(require_key("MISTRAL_API_KEY"))
+        return MistralProvider(require_key(key_env or "MISTRAL_API_KEY"))
     raise ValueError(f"unknown provider {name!r}")
+
+
+class _KeyDayLimit(Exception):
+    """Internal: this key's daily quota is used up; the caller tries the next key."""
+
+    def __init__(self, err: RateLimited):
+        super().__init__(str(err))
+        self.err = err
 
 
 class QuotaLog:
@@ -89,6 +106,9 @@ class LLMClient:
         self.config = config
         llm_cfg = config["llm"]
         self._providers = dict(providers or {})
+        # Injected providers (tests) are the only ones used: real keys in .env are then never touched.
+        self._injected = providers is not None
+        self._exhausted: set[tuple[str, str]] = set()  # (day, key label) whose daily quota is used up
         self.cache = cache if cache is not None else ReplyCache(REPO_ROOT / config["paths"]["llm_cache"])
         self.tracer = tracer if tracer is not None else Tracer(None)
         self.quota_log = quota_log if quota_log is not None else QuotaLog(REPO_ROOT / llm_cfg["quota_log"])
@@ -104,10 +124,27 @@ class LLMClient:
             raise ValueError(f"role must be 'main' or 'judge', not {role!r}")
         return self.config["llm"][role]
 
-    def _provider(self, name: str) -> Any:
-        if name not in self._providers:
-            self._providers[name] = make_provider(name)
-        return self._providers[name]
+    def _slots(self, role_cfg: dict[str, Any]) -> list[tuple[str, str | None]]:
+        """(counter label, key variable) for each usable key of the role's provider, in order.
+
+        The first key's label is the provider name, so its counter is the one kept before D-50.
+        """
+        from core.env import key_present
+        name = role_cfg["provider"]
+        out = []
+        for i, env in enumerate(role_cfg.get("key_envs") or [None]):
+            label = name if i == 0 else f"{name}#{i + 1}"
+            if self._injected:
+                if label in self._providers:
+                    out.append((label, env))
+            elif i == 0 or (env and key_present(env)):
+                out.append((label, env))
+        return out
+
+    def _provider(self, label: str, name: str | None = None, key_env: str | None = None) -> Any:
+        if label not in self._providers:
+            self._providers[label] = make_provider(name or label, key_env)
+        return self._providers[label]
 
     def _stats(self, role: str) -> dict[str, Any]:
         return self.stats.setdefault(role, {"calls": 0, "api_requests": 0, "cache_hits": 0,
@@ -161,28 +198,43 @@ class LLMClient:
 
         day = self._now().date().isoformat()
         rpd = role_cfg.get("rpd")
-        if rpd and self.cache.requests_on(day, provider_name, model) >= rpd:
-            raise QuotaExhausted(f"{provider_name}/{model}: configured daily limit {rpd} reached for {day} "
-                                 f"(Pacific). Resume after midnight Pacific time.")
+        day_limit: RateLimited | None = None
+        for slot, (label, key_env) in enumerate(self._slots(role_cfg), start=1):
+            if (day, label) in self._exhausted or (rpd and self.cache.requests_on(day, label, model) >= rpd):
+                continue
+            try:
+                return self._call(role, role_cfg, label, slot, key_env, model, msgs, tools, call_params, key, day, st)
+            except _KeyDayLimit as limit:
+                self._exhausted.add((day, label))
+                day_limit = limit.err
+        if day_limit is not None:
+            raise QuotaExhausted(f"{provider_name}/{model}: daily quota hit on every key "
+                                 f"({day_limit.quota_id or 'per-day'} = {day_limit.quota_value}). {day_limit}") from day_limit
+        raise QuotaExhausted(f"{provider_name}/{model}: configured daily limit {rpd} reached for {day} "
+                             f"(Pacific) on every key. Resume after midnight Pacific time.")
 
-        provider = self._provider(provider_name)
+    def _call(self, role: str, role_cfg: dict[str, Any], label: str, slot: int, key_env: str | None, model: str,
+              msgs: list[Message], tools: list[ToolSpec] | None, call_params: dict[str, Any], key: str, day: str,
+              st: dict[str, Any]) -> Reply:
+        """Send one request with one key, with retries. Raises _KeyDayLimit when this key's day is used up."""
+        provider_name = role_cfg["provider"]
+        provider = self._provider(label, provider_name, key_env)
         max_attempts = self.config["llm"]["retry"]["max_attempts"]
         last_error: Exception | None = None
         for attempt in range(max_attempts):
             self._throttle(role, role_cfg.get("rpm") or 0)
-            self.cache.count_request(day, provider_name, model)
+            self.cache.count_request(day, label, model)
             st["api_requests"] += 1
             started = self._clock()
             try:
                 reply = provider.call(model, msgs, tools, call_params)
             except RateLimited as err:
                 self.quota_log.record(provider_name, model, err)
-                self.tracer.write("llm_error", role=role, provider=provider_name, model=model,
+                self.tracer.write("llm_error", role=role, provider=provider_name, model=model, key_slot=slot,
                                   kind="rate_limited", per_day=err.per_day, quota_id=err.quota_id,
                                   quota_value=err.quota_value, attempt=attempt + 1, message=str(err)[:300])
                 if err.per_day:
-                    raise QuotaExhausted(f"{provider_name}/{model}: daily quota hit "
-                                         f"({err.quota_id or 'per-day'} = {err.quota_value}). {err}") from err
+                    raise _KeyDayLimit(err) from err
                 last_error = err
                 delay = self._backoff(attempt, err.retry_after)
             except TransientError as err:
@@ -199,7 +251,7 @@ class LLMClient:
                 self.cache.put(key, reply)
                 st["usage"] = st["usage"] + reply.usage
                 self._trace(role, provider_name, model, key, msgs, reply, attempts=attempt + 1,
-                            latency=self._clock() - started)
+                            latency=self._clock() - started, key_slot=slot)
                 return reply
             if attempt + 1 < max_attempts:
                 st["retries"] += 1
@@ -207,10 +259,10 @@ class LLMClient:
         raise LLMError(f"{provider_name}/{model}: gave up after {max_attempts} attempts: {last_error}")
 
     def _trace(self, role: str, provider: str, model: str, key: str, msgs: list[Message], reply: Reply,
-               *, attempts: int, latency: float) -> None:
+               *, attempts: int, latency: float, key_slot: int | None = None) -> None:
         # Raw provider content is left out of the trace to keep it readable; it is in the cache under `key`.
         self.tracer.write(
-            "llm_call", role=role, provider=provider, model=model, cache_key=key,
+            "llm_call", role=role, provider=provider, model=model, cache_key=key, key_slot=key_slot,
             from_cache=reply.from_cache, attempts=attempts, latency_s=round(latency, 3),
             input=[{k: v for k, v in m.to_dict().items() if k not in ("raw", "raw_provider")} for m in msgs],
             output={"text": reply.text, "tool_calls": [tc.__dict__ for tc in reply.tool_calls],

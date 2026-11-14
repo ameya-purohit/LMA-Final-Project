@@ -1,0 +1,4 @@
+The probes could not run as written:
+{problems}
+
+Fix the probes themselves (imports, API use, setup), keeping the same scenario, and call write_probes again with the complete set.

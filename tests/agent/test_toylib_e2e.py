@@ -74,7 +74,7 @@ def test_docs_trap_line_12_rejected_line_88_found():
         ws.close()
     claim = out["claims"][0]
     assert claim["status"] == "confirmed" and "ValueError" in claim["observed_output"]
-    assert claim["citations"] == [{"path": "src/toylib/core.py", "line": 88, "causal": True}] and claim["grade"] == "E+C"
+    assert claim["citations"] == [{"path": "src/toylib/core.py", "line": 88, "causal": True, "untestable": False}] and claim["grade"] == "E+C"
     assert out["mutant_runs"] > 0 and out["cpu_seconds"] > 0
     assert any(d["decision"] == "mutation_check" and not d["causal"] for d in out["decisions"]), "line 12 must be rejected"
 

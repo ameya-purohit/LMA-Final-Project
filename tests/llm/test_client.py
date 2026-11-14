@@ -1,6 +1,7 @@
 """LLMClient with fake providers: cache, retries, quota stop, token logging."""
 
 import datetime as dt
+import json
 
 import pytest
 
@@ -191,3 +192,55 @@ def test_environment_lists_models_and_sdks(tmp_path):
     env = client.environment()
     assert env["models"]["main"]["model"] == "gemini-3.1-flash-lite"
     assert set(env["sdk"]) == {"google-genai", "openai", "mistralai"}
+
+
+# ---------------------------------------------------------------- several keys (D-50)
+KEYS = {"llm": {"main": {"key_envs": ["GEMINI_API_KEY", "GEMINI_API_KEY_2"], "rpd": 2}}}
+
+
+def make_two(tmp_path, script_a, script_b, override=KEYS):
+    cfg = load_config([override])
+    a, b = FakeProvider(script_a), FakeProvider(script_b)
+    clock, tracer = FakeClock(), Tracer(tmp_path / "t.jsonl")
+    client = LLMClient(cfg, providers={"gemini": a, "gemini#2": b}, cache=ReplyCache(tmp_path / "c.sqlite"),
+                       tracer=tracer, quota_log=QuotaLog(tmp_path / "quota.md"), clock=clock.clock,
+                       sleep=clock.sleep, now=lambda: dt.datetime(2026, 11, 7, 12, 0))
+    return client, a, b
+
+
+def test_next_key_takes_over_when_our_daily_guard_is_reached(tmp_path):
+    client, a, b = make_two(tmp_path, [reply("1"), reply("2")], [reply("3"), reply("4")])
+    out = [client.complete([Message(role="user", content=str(i))]).text for i in range(4)]
+    assert out == ["1", "2", "3", "4"] and len(a.calls) == 2 and len(b.calls) == 2
+    assert client.cache.requests_on("2026-11-07", "gemini", "gemini-3.1-flash-lite") == 2
+    assert client.cache.requests_on("2026-11-07", "gemini#2", "gemini-3.1-flash-lite") == 2
+    with pytest.raises(QuotaExhausted, match="every key"):
+        client.complete([Message(role="user", content="5")])
+
+
+def test_server_day_limit_moves_the_same_request_to_the_next_key(tmp_path):
+    err = RateLimited("quota", per_day=True, quota_id="GenerateRequestsPerDayPerProjectPerModel-FreeTier", quota_value="500")
+    client, a, b = make_two(tmp_path, [err], [reply("b1"), reply("b2")], {"llm": {"main": {"key_envs": KEYS["llm"]["main"]["key_envs"]}}})
+    assert client.complete(MSGS).text == "b1"
+    assert client.complete([Message(role="user", content="next")]).text == "b2"
+    assert len(a.calls) == 1, "a key whose day is used up is not tried again that day"
+    events = [json.loads(l) for l in (tmp_path / "t.jsonl").read_text().splitlines()]
+    calls = [e for e in events if e["event"] == "llm_call"]
+    assert [e["key_slot"] for e in calls] == [2, 2]
+    assert not any("GEMINI_API_KEY" in json.dumps(e) and "=" in json.dumps(e) for e in events)
+
+
+def test_every_key_used_up_by_the_server_raises_quota_exhausted(tmp_path):
+    err = RateLimited("quota", per_day=True, quota_id="PerDay", quota_value="500")
+    client, a, b = make_two(tmp_path, [err], [err], {"llm": {"main": {"key_envs": KEYS["llm"]["main"]["key_envs"]}}})
+    with pytest.raises(QuotaExhausted, match="every key"):
+        client.complete(MSGS)
+    assert len(a.calls) == 1 and len(b.calls) == 1
+
+
+def test_only_keys_present_in_env_are_used(monkeypatch):
+    import core.env
+    monkeypatch.setattr(core.env, "key_present", lambda name: name in ("GEMINI_API_KEY", "GEMINI_API_KEY_3"))
+    cfg = load_config([{"llm": {"main": {"key_envs": ["GEMINI_API_KEY", "GEMINI_API_KEY_2", "GEMINI_API_KEY_3"]}}}])
+    client = LLMClient(cfg, cache=ReplyCache(":memory:"), tracer=Tracer(None))
+    assert client._slots(cfg["llm"]["main"]) == [("gemini", "GEMINI_API_KEY"), ("gemini#3", "GEMINI_API_KEY_3")]

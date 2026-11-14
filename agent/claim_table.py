@@ -27,7 +27,8 @@ class ClaimIn(BaseModel):
     scope: Literal["instance", "general"] = Field(default="instance", description="One case, or a general rule")
     behavioural: bool = Field(default=True, description="False only if it cannot be executed (e.g. design rationale)")
     source_kind: Literal["code", "doc", "test"] = Field(default="code", description="What supports the claim so far")
-    citations: list[CitationIn] = Field(default_factory=list)
+    citations: list[CitationIn] = Field(default_factory=list,
+                                        description="At least one for a behavioural claim: the line that decides it")
     test_node: str = Field(default="", description="Optional: a repository test (pytest node id) that asserts this")
 
 
@@ -61,7 +62,9 @@ class ReviseClaim(BaseModel):
     text: str = Field(description="The corrected claim, consistent with the observed output")
     behavioural: bool = True
     source_kind: Literal["code", "doc", "test"] = "code"
-    citations: list[CitationIn] = Field(default_factory=list)
+    # The same rule as ClaimIn.citations (prompt iteration 1), which this schema had missed (D-51).
+    citations: list[CitationIn] = Field(default_factory=list,
+                                        description="At least one for a behavioural claim: the line that decides it")
 
 
 class ProposeCitation(BaseModel):
@@ -97,7 +100,8 @@ class FinalAnswer(BaseModel):
 class Citation:
     path: str
     line: int
-    causal: bool | None = None       # None: not checked
+    causal: bool | None = None       # None: not checked, or untestable
+    untestable: bool = False         # no mutation operator applies to the line (D-47)
 
 
 @dataclass
@@ -165,7 +169,8 @@ class ClaimTable:
             return "(no claims)"
         rows = []
         for c in self.claims:
-            cites = ", ".join(f"{x.path}:{x.line}" + ("" if x.causal is None else (" CAUSAL" if x.causal else " not causal"))
+            cites = ", ".join(f"{x.path}:{x.line}" + (" untestable" if x.untestable else "" if x.causal is None
+                                                      else (" CAUSAL" if x.causal else " not causal"))
                               for x in c.citations) or "none"
             obs = f" | observed: {c.observed_output[:300]}" if c.observed_output else ""
             rows.append(f"[{c.id}] ({c.status}{', ' + c.grade if c.grade else ''}) {c.text} | cites: {cites}{obs}")
