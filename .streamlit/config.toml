@@ -1,0 +1,18 @@
+# Theme for the presentation demo (demo/app.py). Light reads better on a projector, and the code viewer
+# highlights a line with a fixed light background.
+[theme]
+base = "light"
+primaryColor = "#0F6B62"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F6F7"
+textColor = "#1B2430"
+baseRadius = "0.6rem"
+borderColor = "#E3E7EB"
+headingFontWeights = 700
+
+[client]
+# Hide Streamlit's "Deploy" button and developer menu during the presentation.
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false

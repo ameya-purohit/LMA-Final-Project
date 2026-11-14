@@ -24,8 +24,16 @@ fairly, and produce numbers a sceptical reader can check. The course also warns 
   - **Fix-location recall:** at least one citation falls inside a gold range.
 - **Statistics** (`eval/stats.py`). McNemar's exact test on questions where two systems disagree, and a paired bootstrap
   with 10,000 resamples for a confidence interval. Both are checked against known values.
-- **Humans** (`eval/human_export.py`, `eval/kappa.py`). A blinded sample is exported for labelling. If human-judge kappa is
-  below 0.6, the primary comparison uses human labels.
+- **Humans** (`eval/human_export.py`, `eval/label.html`, `eval/kappa.py`).
+  - **Export:** a seeded sample of *questions*, stratified by library. For each one, every system's answer goes into one
+    blinded, shuffled file per labeller, so labels are paired across systems and include every citation from ours and
+    A2 on those questions.
+  - **Labelling:** two members label with the static page `eval/label.html`.
+  - **Agreement:** `eval/kappa.py` reports human-human, human-judge and consensus-judge kappa, separately for answer
+    correctness and for citation labels. Where the two humans disagree, the consensus takes the more conservative
+    label (D-48).
+  - **The kappa rule:** if consensus-judge kappa is below 0.6 for a label kind, the primary comparison uses human labels
+    for that kind.
 
 ## Worked example
 

@@ -1,7 +1,7 @@
 # Explainer: analysis
 
-Owner: Sourav Nath. Files: `analysis/toylib_ablations.py`, `results/summary/`, tests in `tests/analysis/`.
-The full `analysis/make_all.py` (tables and figures for the final report) is pending, in phase P12.
+Owner: Sourav Nath. Files: `analysis/toylib_ablations.py`, `analysis/make_all.py`, `results/summary/`, tests in
+`tests/analysis/`.
 
 ## Problem
 
@@ -22,12 +22,38 @@ results, for free.
 
 Results are written to `results/summary/toylib_ablations.md` and `.json`.
 
+### The final analysis: `analysis/make_all.py` (P12)
+
+Run it with `python -m analysis.make_all --run-id <run> --split test`. It reads the stored answers, judgements, traces and,
+after G3, the human labels, then writes `results/analysis/<run>_<split>/report.md` plus three figures. Every number comes
+from code over files, so anyone can re-run it and get the same report. Its sections:
+
+- **Hypothesis verdicts**, using the thresholds and rules written in `PREREGISTRATION.md`:
+  - **H1:** ours minus B2 on the causally-supported answer rate, needing at least +8 points with a CI above zero. A CI
+    that includes zero is called "inconclusive", never "negative". It also shows correctness on its own, the
+    decomposition.
+  - **H2:** a confident-error rate at least 40% lower than B2's, with coverage no more than 10 points lower.
+  - **H3:** ours minus A2 on causal-citation precision, with a cluster bootstrap over questions. It uses human labels
+    once G3 is done, and until then the judge's labels, marked provisional.
+- **The kappa rule:** if G3 says to, the main comparison is recomputed on the labelled questions with the human labels.
+- **Breakdowns:** per question category and per library, then RQ2, where each mutation acceptance rule (any flip /
+  behavioural / specific) is compared with fix-line membership, and with human labels once they exist. Untestable lines
+  are counted separately (D-47).
+- **Failure taxonomy:** deterministic classes from the judge label and whether a citation hit a fix line, for example
+  "right behaviour, wrong place".
+- **Examples and predictions:** the discordant cases between ours and B2, and each ablation prediction next to what was
+  observed.
+
 ## Worked example
 
 Line 12 (`STRICT_DEFAULT = True`) for the claim "`clamp(-1, strict=False)` raises": *any flip* accepts it, because deleting
 the line breaks an import. *Behavioural* and *specific* reject it, which is right: it does not decide the behaviour.
 `return result` for "`clamp(500) == 100`": *any flip* and *behavioural* accept it, since returning None changes the result,
 but *specific* rejects it, because the control changes too. Each rule removes a distinct kind of false acceptance.
+
+**`make_all` on the October dev run** (13 questions, provisional judge labels):
+- H1 is *inconclusive*: ours minus B2 is −7.7 points, with CI [−30.8, +15.4].
+- The `specific` rule accepted fix lines with 51.9% precision against fix lines; this is a lower bound.
 
 ## Weaknesses
 
@@ -36,6 +62,10 @@ but *specific* rejects it, because the control changes too. Each rule removes a 
 - **The check can still be wrong.** `result = min(x, LIMIT)` does decide the result, but its only applicable mutation is
   deleting the line, which is breakage, so even the strict rule rejects it. That is a real false rejection, and we report it.
 - **Leniency excludes import-time lines,** because tracing covers `observe()` only.
+- **The failure taxonomy is coarse.** It is computed, not hand-coded, so it is reproducible, but it can't tell, for
+  example, a misunderstood question from a wrong probe. The discordant cases section gives the detail for a human to read.
+- **RQ2 against fix lines is a lower bound.** A line outside the fix can be truly causal, so rejecting it counts as an
+  error that isn't one. Human labels at G3 settle this.
 
 ## Viva Q&A
 

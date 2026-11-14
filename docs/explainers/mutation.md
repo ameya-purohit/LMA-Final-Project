@@ -23,7 +23,10 @@ To find which switch controls a lamp, you flip it and watch the lamp. Here:
    in a throw-away copy of the library: change a number (`0 -> -1`), flip `True`/`False`,
    empty a string, negate an `if` condition, swap `<` for `<=`, delete a statement, or make
    a `return` return `None`. One change at a time; the rest of the file stays byte-for-byte
-   identical (we use libcst, which keeps comments and formatting).
+   identical (we use libcst, which keeps comments and formatting). The copies get numbered folder names
+   (`0001`, `0002`, ...) from the question's sandbox session, and the mutants are named `m000`, `m001`, ... in a
+   fixed order (D-52). So rerunning a question gives the model exactly the same text, and the run is replayed from the
+   cache.
 3. **Run the probe on each mutant** and compare its outcome with the original outcome.
 
 Two rules stop the test from being too lenient:
@@ -81,8 +84,16 @@ causal; deleting `result = min(...)` raises UnboundLocalError, which is breakage
 - **Control probes are written by the model.** A badly chosen control (too close to the
   claim) can make a causal line look non-specific.
 - **Lines with nothing to mutate.** No operator applies to a `for` header, a `def` line, `else:` or a continuation
-  line. In the dev runs this was 11 of 54 checked lines, and the agent counted them as non-causal, which is a flaw to
-  fix in P10. A bare function call can only be deleted, so it gives little evidence too.
+  line. In the dev runs this was 11 of 54 checked lines, and the agent counted them as non-causal. Fixed in P10 (D-47):
+  such a line is reported as **untestable** (`MutationReport.untestable`), with no verdict either way. It costs no
+  mutation check, it never triggers a search for another line, and answers mark it `"untestable": true`, so the RQ2
+  table can count it separately. A bare function call can only be deleted, so it gives little evidence too.
+- **On the test set it did not match the developers' fix lines (RQ2, measured).** Over 888 checks on 150 test
+  questions, every rule's verdict agreed with "is this a line the fix changed?" no better than chance (kappa about 0).
+  The `specific` rule that the agent uses rejected 77% of the fix lines it checked. Likely reasons are the ones
+  above: equivalent mutants, redundant code, and a probe or control written so that a one-line change doesn't flip
+  it. This is the main reason the full agent did not beat B2 (`docs/results.md` §5). The human labels at G3 test
+  the same rules against people's judgement.
 - **Cost.** Each mutant is a separate process run (about 0.15 s in Docker on toylib;
   more for larger libraries).
 
