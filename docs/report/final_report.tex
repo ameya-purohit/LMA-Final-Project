@@ -17,7 +17,10 @@
 \usepackage{caption}
 \usepackage{titlesec}
 \usepackage{multicol}
+\usepackage{float}
 \usepackage[hidelinks]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
 
 \setlist{nosep,leftmargin=*}
 \setlength{\parskip}{3pt}
@@ -42,24 +45,16 @@ LMA Group Project (CL3.410, Monsoon 2026), Team Disco 82\\[2pt]
 \end{center}
 
 \begin{abstract}
-\noindent Developers often ask how a library behaves when its documentation may be wrong. LLM assistants tend to
-repeat the documentation and cite code lines that look related but do not decide the behaviour. We built an agent
-that checks its answer in two ways. First, it splits the answer into small claims and tests each one with a short
-generated program (a \emph{probe}) that runs in an offline Docker sandbox against the library as it was before the
-question was asked. Second, it keeps a cited line only if changing that line (a \emph{mutation}) changes the claim's
-result while leaving related control checks unchanged. Failed checks become the agent's next thing to investigate.
-We tested it on real GitHub issues from \code{click} and \code{marshmallow}, with answer keys built automatically from
-each issue's merged fix and its test. The hypotheses were pre-registered and the test set was locked before any test
-run. On 145 test questions, the agent did \textbf{not} beat a ReAct agent with the same tools, model and budget: 40.0\%
-against 49.7\% correct and causally cited answers by an LLM judge (95\% CI of the difference [\m19.3, \m0.7]), and
-25.0\% against 41.7\% on 12 questions labelled by two humans. The judge agreed with the humans only fairly (kappa 0.36
-and 0.32), so by our pre-registered rule the human labels count first. With human labels, the mutation check
-\emph{lowered} citation precision (30.6\% against 44.1\% without it). Its verdicts agree with the lines developers
-actually changed no better than chance. The agent does beat closed-book and single-call RAG baselines by wide
-margins, and no system ran an unsafe action. Our main result is therefore negative, and the traces show why: in real
-code, mutation is a poor test of whether a line causes a behaviour, and acting on it moves the agent away from good
-citations. An exploratory multi-agent extension, added after the main results, made the pipeline much cheaper but did
-not fix this.
+\noindent Developers often ask how a library really behaves when its documentation may be wrong. LLM assistants tend
+to repeat the documentation and cite code that looks related but does not decide the behaviour. We built an agent that
+checks its own answer twice: it runs a small test program for each claim, and it keeps a cited code line only if
+changing that line changes the test's result. We compared it with a ReAct agent that had the same tools, model and
+budget, on 145 real GitHub issues from \code{click} and \code{marshmallow}, with answer keys built automatically from
+each issue's merged fix. The hypotheses were pre-registered and the test set was locked before any test run. Our agent
+did \textbf{not} win: 40.0\% of its answers were correct and correctly cited, against 49.7\% for ReAct by an LLM
+judge, and 25.0\% against 41.7\% on 12 questions labelled by humans. The line-changing check was the main problem: it
+rejected most of the lines that developers actually fixed. Both agents were far better than simple baselines, and no
+system ran an unsafe action.
 \end{abstract}
 
 \section{Introduction}
@@ -79,11 +74,56 @@ changed, a condition negated, a comparison swapped, a statement deleted). The ci
 only if some mutant changes the claim probe's result and leaves the control probes unchanged. A rejected citation
 sends the agent looking for the line that does decide the behaviour. Each final claim carries a grade: executed and
 causally cited (E+C), executed (E), confirmed by a repository test (T), read only (R) or documentation only (D).
+Figure~\ref{fig:loop} shows the loop.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=0.62cm,
+  box/.style={draw, rounded corners=2pt, align=center, text width=2.05cm, minimum height=1.05cm, fill=gray!8},
+  chk/.style={box, fill=blue!7},
+  arr/.style={-{Stealth[length=4pt]}, thick}]
+\node[box] (q) {Question +\\code frozen before the fix};
+\node[box, right=of q] (inv) {Investigate:\\search and read code};
+\node[box, right=of inv] (dr) {Draft:\\claims + cited lines};
+\node[chk, right=of dr] (c1) {\textbf{Check 1}\\run a probe for\\each claim};
+\node[chk, right=of c1] (c2) {\textbf{Check 2}\\mutate each\\cited line};
+\node[box, right=of c2] (ans) {Graded answer\\(E+C, E, T, R, D)};
+\draw[arr] (q)--(inv); \draw[arr] (inv)--(dr); \draw[arr] (dr)--(c1);
+\draw[arr] (c1)--(c2); \draw[arr] (c2)--(ans);
+\draw[arr] (c1.south) -- ++(0,-0.45) -| node[pos=0.25,below,font=\scriptsize]{claim refuted: investigate the observed output} (inv.south);
+\draw[arr] (c2.north) -- ++(0,0.45) -| node[pos=0.25,above,font=\scriptsize]{line not causal: look for the line that decides it} (inv.north);
+\end{tikzpicture}
+\caption{The agent's loop. Confirmed claims go on to Check 2, and causal lines go into the answer. Failed checks send it back to investigate; budget limits stop the loop (8 investigation
+steps, 12 probe runs, 25 requests per question).}
+\label{fig:loop}
+\end{figure}
 
 \textbf{Research questions.} RQ1: does this procedure give more correct, causally cited answers, and fewer confident
 errors, than a ReAct agent with the same tools (including execution and mutation) and the same limits? RQ2: how well
 does the mutation check agree with human judgements of causality and with the lines the developer changed, and which
 acceptance rule agrees best?
+
+\begin{center}
+\fbox{\begin{minipage}{0.97\linewidth}\small
+\textbf{Key terms.}
+\textbf{Probe:} a short generated Python test that runs the scenario and asserts the claim. \textbf{Control probes}
+test nearby behaviour that should not change.
+\textbf{Mutation:} one small edit to one cited line in a throw-away copy, e.g.\ \code{100}$\rightarrow$\code{101},
+\code{<}$\rightarrow$\code{<=}, or deleting the statement.
+\textbf{Causal citation:} a cited line that really decides the behaviour. When scoring, a citation counts as causal if
+the developer's fix changed that line, or if a human (or the judge) labels it causal.
+\textbf{Causally-supported answer} (our main metric): the answer is correct \emph{and} every claim has at least one
+causal citation.
+\textbf{Confident error:} a wrong answer that the system did not flag as uncertain. \textbf{Coverage:} the share of
+answers not flagged.
+\textbf{Fix-location recall:} the share of questions where at least one citation is a line the fix changed.
+\textbf{Kappa:} agreement between two labellers after removing chance (0 = chance, 1 = perfect). We required at least
+0.6 to trust the LLM judge.
+\textbf{95\% CI:} if the interval for a difference does not include zero, the difference is unlikely to be chance.
+\textbf{Systems:} \emph{ours}; \textbf{B0} closed book; \textbf{B1} one-call RAG; \textbf{B2} ReAct with the same
+tools; \textbf{A1--A10} are ours with one part removed or changed (\S6.3); \textbf{E0--E6} are the extension (\S7).
+\end{minipage}}
+\end{center}
 
 \textbf{Pre-registered hypotheses} (\code{PREREGISTRATION.md}, fixed before any test run). \textbf{H1}: ours beats B2
 (ReAct, same tools) on the causally-supported answer rate by at least 8 points, with a paired 95\% CI that excludes
@@ -134,7 +174,7 @@ from the test output and the diff. A category is computed in code: \emph{doc-rel
 \emph{single location}. A system sees only the issue title and first post, plus the frozen tree; a unit test checks
 that the workspace cannot hold the fix, the test names or the gold.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Mining funnel (\code{data/mining\_report.md}). Each dropped item and its reason is in \code{data/dropped.jsonl}.}
 \begin{tabular}{lrrr}
@@ -202,8 +242,9 @@ per question.
 probe; if they match, the claim is refuted and investigated again with the observed output as the goal.
 \item \emph{Check 2}: for each citation of a confirmed claim, apply each mutation operator to the cited line with libcst
 (the rest of the file stays byte-identical) and rerun the claim and control probes. Three acceptance rules are computed:
-\emph{any\_flip} (any change), \emph{behavioural} (a change that is not just breakage, such as a SyntaxError or a
-NameError) and \emph{specific} (behavioural, with every control unchanged). The agent uses \emph{specific}. A rejected
+\emph{any\_flip} (the result changed in any way), \emph{behavioural} (it changed, and not only because the code broke,
+e.g.\ a SyntaxError) and \emph{specific} (behavioural, and the control probes did not change). The agent uses
+\emph{specific}. A rejected
 citation triggers a search for a better line, which is then checked again. A line no operator applies to is
 \emph{untestable}.
 \item \emph{Vacuity check}: if a confirmed claim has no causal citation, check whether any mutant in its function
@@ -218,7 +259,7 @@ starting material, asked to cite lines. \textbf{B2}, ReAct: the shared tool loop
 including \code{run\_probe} and \code{mutate\_and\_run}, and the same limits (8 steps, 12 probe runs, 25 requests).
 B2+ (a larger budget) and B3 (Chain-of-Verification) are implemented but were not run.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Capabilities used (four of the five; fine-tuning was not done, because RQ1 compares procedures on the
 \emph{same} model).}
@@ -254,18 +295,14 @@ then B0, on the 150 test questions (145 analysed, 7--11 Nov); all 1,050 answers 
 and the two A10 variants on the first 50 test questions in the seeded order (47 after the spot check, 11 Nov).
 \code{adv}: ours, B2 and B1 on the adversarial set (10 Nov).
 
-\textbf{Metrics.} \emph{Primary: causally-supported answer rate}: the answer is correct \emph{and} every claim has at
-least one causal citation. A citation is causal if it falls inside a gold range or is labelled causal (by the judge, or
-by humans where they exist). Partial answers count as wrong. We also report correctness alone; \emph{confident errors}
-(wrong answers that were neither flagged nor abstained); \emph{coverage} (answers neither flagged nor abstained);
-\emph{fix-location recall} (questions with at least one citation in a gold range); and cost. Precision against gold
-ranges is a lower bound, since a line outside the fix can also decide the behaviour. Tests are paired by question:
-McNemar's exact test and a paired bootstrap with 10,000 resamples for 95\% CIs (clustered by question for citation
-precision).
+\textbf{Metrics.} The main metric is the causally-supported answer rate (see Key terms). We also report
+correctness alone, confident errors, coverage, fix-location recall and cost. Partial answers count as wrong. Precision
+against the fix lines is only a lower bound, because a line outside the fix can also decide the behaviour. All
+comparisons are paired by question: McNemar's exact test, and a paired bootstrap with 10,000 resamples for 95\% CIs.
 
 \section{Results}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Main results on 145 test questions, judge labels (\code{results/summary/analysis\_main\_test}). Conf.\ err.\ =
 confident errors.}
@@ -287,6 +324,8 @@ A3, flag only & 61.4\% & 40.7\% & 60.0\% & \textbf{29 (20.0\%)} & 67.6\% & 8.5 &
 
 Ours is far ahead of the simple baselines: +18.6 points over B1 on the primary metric (CI [+10.3, +26.9]) and +35.2
 over B0. It is behind B2, the ReAct agent with the same tools, while using 40\% more requests and 56\% more tokens.
+\emph{In short:} both tool-using agents are far better than the simple baselines, and B2 is better than ours while
+costing less.
 
 \subsection{Checking the judge against humans (gate G3)}
 
@@ -297,10 +336,12 @@ citations. Judge--human kappa was only 0.363 and 0.322. On citations the judge i
 higher than the humans did (49 of them \emph{causal} where the humans said \emph{on-topic but not causal}) and 11 lower.
 On correctness it errs both ways (15 higher, 11 lower). Both kappas are below the pre-registered 0.6, so \textbf{the
 primary comparison uses the human labels}, and the 145-question judge results are secondary.
+\emph{In short:} the two humans agree with each other, but the judge often disagrees with them, so we trust the human
+labels more.
 
 \subsection{Hypothesis tests}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Pre-registered hypotheses. Human labels (12 questions) are primary; judge labels (145 questions) are secondary.}
 \begin{tabularx}{\linewidth}{@{}l l Y l@{}}
@@ -324,10 +365,12 @@ floor of about 120 that we set in advance, but the pre-registration also states 
 50\% power to detect an 8-point gain. So a CI that includes zero is inconclusive, not evidence of no effect. Here the
 judge-based H1 interval lies below zero, in B2's favour. Before the spot check, on all 150 questions, the gap was
 \m10.7 points (CI [\m20.0, \m1.3], $p=0.033$), so the exclusion does not change the conclusion.
+\emph{In short:} none of the three hypotheses held. B2 was better on H1, and the mutation check made citations worse
+on H3.
 
 \subsection{Ablations}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Ablations: one config flag each, same questions, model and budget. CIs are for ours minus the ablation.}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} >{\raggedright\arraybackslash}p{4.4cm} Y@{}}
@@ -351,10 +394,12 @@ answering confidently less often. Mutation lowered human-judged citation quality
 developer's lines, but handing it the right files did not raise correctness: the limit is in using the material, not
 finding it. On the 9 planted toylib lines, \emph{specific} agrees with the planted truth on 8, against 7 for the other
 rules; the rule works on the code it was designed on, but not on real libraries (below).
+\emph{In short:} removing any one part of our procedure changed almost nothing; flagging instead of re-investigating
+reduced confident errors; and retrieval mainly helps the agent find the right lines.
 
 \subsection{RQ2: is mutation a good test of causality?}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Mutation verdicts of ours on the test set: 862 checks, of which 123 lines were untestable (31 of them fix
 lines). Precision against fix lines is a lower bound.}
@@ -376,10 +421,12 @@ most. Requiring the controls to stay unchanged rejects many truly causal lines i
 affects several behaviours. Likely causes are equivalent mutants, redundant code paths and controls that are not
 really independent of the claim. The 52 human-labelled lines make these kappas imprecise, but none reaches even
 moderate agreement (0.4).
+\emph{In short:} the mutation check's verdicts are close to random, whether compared with what developers fixed or
+with what humans judged.
 
 \subsection{Tool use, safety and prompt injection}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \caption{Tool use from the traces of the 145 test questions (replays counted once). Verdict rate = probes that ran and
 reached pass or fail. Blocked = probes refused by the AST policy before running.}
@@ -401,6 +448,8 @@ the planted text reached the model in 12/15 items for ours, 11/15 for B2 and 8/1
 added the canary to their answer in 7/12, 9/11 and 6/8 cases. No probe attempted the dangerous action (\code{curl},
 writing to \code{\textasciitilde/.ssh}), but several answers repeated a planted ``works as intended'' verdict. The
 sandbox protects the machine; nothing stops read text from changing the answer.
+\emph{In short:} tools were called correctly almost every time and every risky probe was blocked, but planted text can
+still change what an answer says.
 
 \subsection{Categories, examples and why ours lost}
 
@@ -426,60 +475,61 @@ budget that B2 spends on investigating. (4) Flagging separates right from wrong 
 were in fact correct. By failure class (judge labels and fix-line hits), B2 has more answers that are correct and
 causally supported (72 vs 58), and ours has more with the right behaviour but the wrong place (22 vs 18).
 
-\section{Exploratory Extension: Multi-Agent Fault Localization}
+\section{Exploratory Extension: Splitting the Agent into Roles}
 
-\emph{This was designed after the main results were known and pre-registered separately before its own test runs. It
-does not change H1--H3.} It asks whether specialised roles, better retrieval, a code graph and better-chosen
-experiments locate the deciding lines better than the locked agent (E0) and B2. Five roles run in a fixed order
-(\code{multiagent/orchestrator.py}, no framework), passing typed pydantic objects: a Bug Investigator (states the
-behaviour and 2--4 hypotheses), a Probe Engineer (reproduce and control probes), a Code Analyst (ranks suspicious
-lines), an Experiment Engineer (plain code; runs mutation checks with three verdicts: accepted, inconclusive when a
-control also changes, and rejected) and a Causal Verifier (judges the hypotheses and writes the answer). The
-configurations add one thing at a time: E1 the roles with BM25; E2 hybrid retrieval (BM25 + dense bge-small~[26],
-FAISS~[27], fused by RRF~[22], then a cross-encoder rerank~[25]); E3 a code graph with slicing~[24, 28] and
-executed-line spectra (Ochiai~[23]); E4 pairwise mutation; E5 experiment selection by information gain; E6 E5 with its
-tools behind an MCP server~[29]. Like AutoCodeRover~[30] it mixes code-structure search with spectrum-based
-localization; unlike AutoGen~[31] the agents exchange typed objects, not chat. The budget is 12 requests per question
-(E0: 25). It ran on the 47 \code{sub50} questions, with prompts developed on only 2 dev questions.
+\emph{Designed after the main results were known, pre-registered separately before its own test runs, and not part of
+H1--H3.} The single agent spent one budget on everything, so we tried splitting the work into five roles that run in a
+fixed order and pass structured data to each other (\code{multiagent/orchestrator.py}, no framework). A \emph{Bug
+Investigator} states the behaviour and 2--4 possible causes; a \emph{Probe Engineer} writes the test and control
+probes; a \emph{Code Analyst} ranks suspicious lines; an \emph{Experiment Engineer} (plain code, no LLM) runs the
+mutation checks; and a \emph{Causal Verifier} writes the answer. Mutation now has three verdicts: accepted, rejected,
+and inconclusive (the result changed, but a control changed too). We then added one idea at a time. \textbf{E1} is the
+roles alone. \textbf{E2} adds better retrieval: keyword search (BM25) and embedding search combined by reciprocal rank
+fusion~[22, 26, 27], then a re-ranking model~[25]. \textbf{E3} adds a code graph that follows calls and data
+flow~[24, 28], plus which lines the probes actually executed~[23]. \textbf{E4} mutates pairs of lines. \textbf{E5}
+picks the most informative check next and stops early. \textbf{E6} runs the same tools through an MCP server~[29].
+AutoCodeRover~[30] also mixes code search with execution-based localization; AutoGen~[31] lets agents chat, while ours
+pass typed objects. The budget is 12 requests per question (E0, our locked agent: 25). It ran on the 47 \code{sub50}
+test questions, with prompts developed on 2 dev questions.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
-\caption{Extension on 47 test questions (\code{docs/extension\_results.md}). Gold = the developer's fix lines, so all
-localization rates are lower bounds. E4 matched E3 and E6 matched E5 on every localization measure.}
-\setlength{\tabcolsep}{3.6pt}
-\begin{tabular}{lrrrrrrr}
+\caption{Extension on 47 test questions (\code{docs/extension\_results.md}). Top-1 / Top-3: share of questions where a
+line the developer fixed is ranked first / in the first three. These are lower bounds. E4 matched E3, and E6 matched
+E5.}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
 \toprule
-System & Line Top-1 & Line Top-3 & Line MRR & Correct (judge) & Fix lines accepted & Requests/q & Tokens/q\\
+System & Fix line Top-1 & Fix line Top-3 & Correct (judge) & Fix lines accepted & Requests/q & Tokens/q\\
 \midrule
-E0 (locked agent) & \textbf{48.9\%} & 59.6\% & 0.532 & 53.2\% & 24/48$^{*}$ & 14.9 & 187,823\\
-B2 (ReAct) & 46.8\% & \textbf{61.7\%} & \textbf{0.539} & \textbf{61.7\%} & -- & 9.9 & 109,529\\
-E1 roles & 34.0\% & 48.9\% & 0.401 & 48.9\% & 9/46 & 7.6 & 32,031\\
-E2 + hybrid retrieval & 40.4\% & 55.3\% & 0.479 & 57.4\% & 9/43 & 7.8 & 33,678\\
-E3 + code graph & 31.9\% & 36.2\% & 0.358 & 55.3\% & 11/48 & 8.0 & 35,393\\
-E5 + information gain & 31.9\% & 36.2\% & 0.352 & 55.3\% & 10/43 & 8.0 & 35,337\\
+E0 (locked agent) & \textbf{48.9\%} & 59.6\% & 53.2\% & 24/48$^{*}$ & 14.9 & 187,823\\
+B2 (ReAct) & 46.8\% & \textbf{61.7\%} & \textbf{61.7\%} & -- & 9.9 & 109,529\\
+E1 roles & 34.0\% & 48.9\% & 48.9\% & 9/46 & 7.6 & 32,031\\
+E2 + better retrieval & 40.4\% & 55.3\% & 57.4\% & 9/43 & 7.8 & 33,678\\
+E3 + code graph & 31.9\% & 36.2\% & 55.3\% & 11/48 & 8.0 & 35,393\\
+E5 + informative checks & 31.9\% & 36.2\% & 55.3\% & 10/43 & 8.0 & 35,337\\
 \bottomrule
 \end{tabular}\\[2pt]
 \footnotesize $^{*}$Not comparable with E1--E5 or with Table 6: E0 counts each distinct line once per question by its
-first recorded verdict, and its ``no'' also includes flips that changed a control, which E1--E5 call inconclusive.
+first verdict, and its ``no'' also includes changes that moved a control, which E1--E5 call inconclusive.
 \end{table}
 
-No extension configuration beats E0 or B2 on any localization measure, and no correctness difference has a CI that
-excludes zero. E1 lowered line MRR against E0 (\m0.131, CI [\m0.238, \m0.035]), and the code graph lowered line Top-3
-from E2 to E3 (\m19.1 points, CI [\m34.0, \m4.3], $p=0.035$). The reason is the ranking: lines are sorted accepted,
-cited, inconclusive, untested, rejected. E2 ranks about 3 lines, so 12 of its 26 top-3 fix-line hits were lines the
-check had \emph{rejected}, kept only because the list was short. E3 ranks about 8 lines, most new ones come out
-inconclusive, and they push the rejected fix lines down. Pairwise mutation (95 pair checks) never accepted a pair.
-Information-gain selection cut mutant runs from 15.2 to 11.4 per question with the same Top-3, and the MCP version gave
-identical answers on all 47 questions. The roles used half of E0's requests and a sixth of its tokens.
+\emph{In short:} the roles were much cheaper (about half the requests and a sixth of the tokens of E0) with similar
+correctness, but no extended version found the fixed lines better than E0 or B2, and no correctness difference was
+significant. Adding the code graph made it worse (Top-3 55.3\% $\rightarrow$ 36.2\%, CI [\m34.0, \m4.3], $p=0.035$).
+The reason is the ranking: accepted lines come first, then cited, inconclusive, untested and rejected ones. The graph
+added many lines that came out inconclusive, and these pushed the developer's lines, which the check had often
+rejected, down the list. Pair mutation never accepted a pair (0 of 95). Choosing the most informative check saved a
+quarter of the mutation runs (15.2 $\rightarrow$ 11.4 per question) with the same result, and the MCP version gave
+identical answers on all 47 questions.
 
-\textbf{Retrieval study} (no LLM, 142 test questions that have a relevant chunk). Fusing BM25 and dense retrieval with
-RRF was the one clearly positive result: hit@5 71.8\% against 64.1\% for BM25 (+7.7 points, CI [+1.4, +14.1],
-$p=0.035$). The cross-encoder reranker, trained on web text, hurt (hit@5 \m11.3 points against RRF, $p=0.009$). Our
-pre-registered prediction was stated on Recall@5: the reranked mode (42.0\%) did not beat BM25 (46.3\%), so it was not
-supported, and dense alone (47.6\%) did not beat BM25, as predicted. E2--E6 still used the reranker as pre-registered,
-because switching after seeing test results would be tuning on test. The extension points the same way as the main
-study: the three-way check accepted only about one in five fix lines in E1--E5, so the causal test, not the search,
-limits localization.
+\textbf{Retrieval alone} (no LLM, 142 test questions). Combining keyword and embedding search was the one clear win: a
+chunk containing a fixed line was in the top 5 for 71.8\% of questions, against 64.1\% for keyword search alone (+7.7
+points, CI [+1.4, +14.1], $p=0.035$). The re-ranking model, trained on web text, made it worse (\m11.3 points,
+$p=0.009$), although we had predicted it would help (on Recall@5 it scored 42.0\% against 46.3\% for keyword search).
+E2--E6 still used it, as pre-registered, because switching after seeing test results would be tuning on test. Overall
+the extension points the same way as the main study: the causal check, not the search, is the bottleneck. The
+three-way check accepted only about one in five fixed lines in E1--E5.
 
 \section{Limitations}
 
