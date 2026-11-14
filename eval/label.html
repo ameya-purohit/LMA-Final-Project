@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Answer labels (gate G3)</title>
+<!--
+  Self-contained: no server, no network, no external files. Open it straight from disk.
+  Labels check the AI judge (Cohen's kappa) and give H3 its human-judged citation precision.
+  Answers are blinded: the page never shows which system wrote them.
+  All dataset text is shown with textContent, never innerHTML: it is data, not markup.
+-->
+<style>
+  :root { --bg:#fafafa; --card:#fff; --ink:#1d1d1f; --muted:#666; --line:#ddd; --add:#e6ffec; --del:#ffebe9;
+          --hunk:#ddf4ff; --ok:#1a7f37; --accent:#0969da; --hl:#fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line);
+           padding:10px 16px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0 10px 0 0; }
+  #status { color:var(--muted); } #status.done { color:var(--ok); font-weight:600; }
+  main { max-width:1100px; margin:0 auto; padding:16px 16px 80px; }
+  .intro, .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 16px; }
+  .card { margin:18px 0; } .card.complete { border-left:5px solid var(--ok); }
+  .card h2 { font-size:16px; margin:0 0 6px; }
+  h3 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:14px 0 4px; }
+  pre { margin:0; white-space:pre-wrap; word-break:break-word; font:12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+  .box { background:#f6f8fa; border:1px solid var(--line); border-radius:6px; padding:8px 10px; max-height:300px; overflow:auto; }
+  .answer { background:#fff; border:2px solid var(--accent); border-radius:6px; padding:8px 10px; }
+  .fail { background:var(--del); border-radius:6px; padding:6px 10px; margin:4px 0; }
+  details > summary { cursor:pointer; color:var(--accent); margin:8px 0; }
+  .diff { border:1px solid var(--line); border-radius:6px; max-height:380px; overflow:auto; }
+  .diff div { padding:0 8px; white-space:pre-wrap; word-break:break-word; font:12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+  .diff .add { background:var(--add); } .diff .del { background:var(--del); } .diff .hunk { background:var(--hunk); color:#555; }
+  .diff .file { background:#eee; font-weight:600; }
+  .q { border-top:1px dashed var(--line); padding:10px 0 4px; }
+  .q p { margin:0 0 6px; font-weight:600; }
+  .q label { margin-right:14px; cursor:pointer; white-space:nowrap; }
+  .cite { border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin:8px 0; }
+  .snip .hl { background:var(--hl); }
+  input[type=text] { width:100%; margin-top:6px; padding:5px 8px; border:1px solid var(--line); border-radius:5px; font:inherit; }
+  button, .file-btn { font:inherit; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:#f6f8fa; cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button:disabled { opacity:.5; cursor:default; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Answer labels (G3)</h1>
+  <label class="file-btn">Open my file…
+    <input id="file" type="file" accept=".jsonl,.json,.txt" class="hidden">
+  </label>
+  <span id="status">No file loaded.</span>
+  <button id="export" class="primary" disabled>Export labels</button>
+</header>
+<main>
+  <div class="intro">
+    <p><b>How to use.</b> Open <code>labels_&lt;your name&gt;.jsonl</code>. For each answer, read the question, the gold
+      answer and what the failing test showed on the old code, then label the answer, and label every citation. Answers
+      are saved in this browser as you go. When all are done, click <b>Export labels</b>; it downloads
+      <code>labels_&lt;your name&gt;_done.jsonl</code>. Send it back. The guide is <code>docs/annotation_guide.md</code>, Part 2.</p>
+    <p><b>Answer:</b> <i>correct</i> = matches the gold behaviour; <i>partial</i> = part right (for example right behaviour,
+      wrong place); <i>incorrect</i> = wrong behaviour. <b>Citation:</b> <i>causal</i> = changing this line would change the
+      claimed behaviour; <i>on-topic</i> = about the same feature but does not decide it; <i>irrelevant</i> = unrelated.
+      Judge each citation against the claim shown with it. Decide yourself; do not use an AI tool.</p>
+  </div>
+  <div id="cards"></div>
+</main>
+
+<!-- Pure logic: no DOM access, so it can be tested outside a browser (tests/eval). -->
+<script id="logic">
+const ANSWER_LABELS = ["correct", "partial", "incorrect"];
+const CITATION_LABELS = ["causal", "on_topic", "irrelevant"];
+
+function parseJsonl(text) {
+  const rows = [];
+  text.split(/\r?\n/).forEach((line, i) => {
+    if (!line.trim()) return;
+    try { rows.push(JSON.parse(line)); } catch (e) { throw new Error("line " + (i + 1) + " is not valid JSON"); }
+  });
+  if (!rows.length) throw new Error("the file has no items");
+  const who = rows[0].labeller;
+  for (const r of rows) {
+    if (!r.item || !r.labeller || !Array.isArray(r.citations)) throw new Error("not a labels_<name>.jsonl file");
+    if (r.labeller !== who) throw new Error("the file mixes labellers " + who + " and " + r.labeller);
+  }
+  return rows;
+}
+
+function isComplete(row, a) {
+  if (!a || !ANSWER_LABELS.includes(a.correctness)) return false;
+  return row.citations.every((c, i) => CITATION_LABELS.includes((a.citations || [])[i]));
+}
+
+function labelRecord(row, a, nowIso) {
+  return { item: row.item, labeller: row.labeller, correctness: a.correctness,
+           citations: row.citations.map((c, i) => a.citations[i]), note: (a.note || "").trim(), labelled_at: nowIso };
+}
+
+function toJsonl(rows, answers, nowIso) {
+  return rows.filter(r => isComplete(r, answers[r.item]))
+             .map(r => JSON.stringify(labelRecord(r, answers[r.item], nowIso))).join("\n") + "\n";
+}
+
+function diffLineClass(line) {
+  if (line.startsWith("diff --git") || line.startsWith("+++") || line.startsWith("---") || line.startsWith("index ")) return "file";
+  if (line.startsWith("@@")) return "hunk";
+  if (line.startsWith("+")) return "add";
+  if (line.startsWith("-")) return "del";
+  return "";
+}
+
+if (typeof module !== "undefined") module.exports = { ANSWER_LABELS, CITATION_LABELS, parseJsonl, isComplete, labelRecord, toJsonl, diffLineClass };
+</script>
+
+<!-- User interface. -->
+<script>
+(function () {
+  let rows = [], answers = {}, who = null;
+  const $ = id => document.getElementById(id);
+  const key = () => "labels:" + who;
+  function el(tag, attrs, text) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function save() { try { localStorage.setItem(key(), JSON.stringify(answers)); } catch (e) {} }
+  function load() { try { return JSON.parse(localStorage.getItem(key()) || "{}"); } catch (e) { return {}; } }
+  function status() {
+    const done = rows.filter(r => isComplete(r, answers[r.item])).length;
+    $("status").textContent = who + ": " + done + " of " + rows.length + " answers labelled" + (done === rows.length ? " ✓ ready to export" : "");
+    $("status").className = done === rows.length ? "done" : "";
+    $("export").disabled = done === 0;
+    rows.forEach(r => { const c = $("card-" + r.item); if (c) c.classList.toggle("complete", isComplete(r, answers[r.item])); });
+  }
+  function radios(name, options, current, onPick) {
+    const box = el("div");
+    options.forEach(v => {
+      const lab = el("label");
+      const inp = el("input", { type: "radio", name: name, value: v });
+      if (current === v) inp.checked = true;
+      inp.addEventListener("change", () => onPick(v));
+      lab.append(inp, " " + v.replace("_", "-"));
+      box.appendChild(lab);
+    });
+    return box;
+  }
+  function card(r) {
+    const a = answers[r.item] = answers[r.item] || { citations: [] };
+    a.citations = a.citations || [];
+    const c = el("section", { class: "card", id: "card-" + r.item });
+    c.appendChild(el("h2", {}, r.item));
+    c.appendChild(el("h3", {}, "Question (issue title and opening post)"));
+    const qb = el("div", { class: "box" }); qb.appendChild(el("pre", {}, r.question)); c.appendChild(qb);
+    c.appendChild(el("h3", {}, "Gold answer"));
+    c.appendChild(el("pre", {}, r.gold_answer));
+    c.appendChild(el("h3", {}, "Failing test on the old (frozen) code"));
+    (r.observed_before || []).forEach(o => { const f = el("div", { class: "fail" }); f.appendChild(el("pre", {}, o.test + "  [" + o.status + "]\n" + (o.message || ""))); c.appendChild(f); });
+    const det = el("details"); det.appendChild(el("summary", {}, "Show the fix (source part of the diff)"));
+    const d = el("div", { class: "diff" });
+    (r.fix_diff || "").split("\n").forEach(line => d.appendChild(el("div", { class: diffLineClass(line) }, line || " ")));
+    det.appendChild(d); c.appendChild(det);
+    c.appendChild(el("h3", {}, "The answer to label"));
+    const ab = el("div", { class: "answer" }); ab.appendChild(el("pre", {}, r.answer)); c.appendChild(ab);
+    const q1 = el("div", { class: "q" }); q1.appendChild(el("p", {}, "Is this answer correct?"));
+    q1.appendChild(radios(r.item + ":answer", ANSWER_LABELS, a.correctness, v => { a.correctness = v; save(); status(); }));
+    c.appendChild(q1);
+    if (!r.citations.length) c.appendChild(el("p", {}, "(This answer cites no lines.)"));
+    r.citations.forEach((ct, i) => {
+      const box = el("div", { class: "cite" });
+      box.appendChild(el("p", {}, "Citation " + ct.n + ": " + ct.path + ":" + ct.line));
+      box.appendChild(el("pre", {}, "Claim: " + ct.claim));
+      const sn = el("div", { class: "box snip" });
+      (ct.snippet || "").split("\n").forEach(line => sn.appendChild(el("pre", { class: line.startsWith(">>") ? "hl" : "" }, line)));
+      box.appendChild(sn);
+      box.appendChild(radios(r.item + ":c" + i, CITATION_LABELS, a.citations[i], v => { a.citations[i] = v; save(); status(); }));
+      c.appendChild(box);
+    });
+    const note = el("input", { type: "text", placeholder: "Note (optional)" });
+    note.value = a.note || "";
+    note.addEventListener("input", () => { a.note = note.value; save(); });
+    c.appendChild(note);
+    return c;
+  }
+  function show(text) {
+    try { rows = parseJsonl(text); } catch (e) { alert("Could not load the file: " + e.message); return; }
+    who = rows[0].labeller; answers = load();
+    const cards = $("cards"); cards.replaceChildren();
+    rows.forEach(r => cards.appendChild(card(r)));
+    status();
+  }
+  $("file").addEventListener("change", ev => {
+    const f = ev.target.files[0]; if (!f) return;
+    const reader = new FileReader(); reader.onload = () => show(String(reader.result)); reader.readAsText(f, "utf-8");
+  });
+  $("export").addEventListener("click", () => {
+    const done = rows.filter(r => isComplete(r, answers[r.item])).length;
+    if (done < rows.length && !confirm(done + " of " + rows.length + " labelled. Export only the finished ones?")) return;
+    const blob = new Blob([toJsonl(rows, answers, new Date().toISOString())], { type: "application/x-ndjson" });
+    const a = el("a", { href: URL.createObjectURL(blob), download: "labels_" + who + "_done.jsonl" });
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  window.__labels = { show: show };  // used by the headless render test only
+})();
+</script>
+</body>
+</html>

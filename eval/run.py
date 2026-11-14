@@ -4,17 +4,24 @@ Each finished answer is written to `results/<run_id>/<system>/<qid>.json` at onc
 so a run that hits the daily quota loses nothing: re-running skips finished
 questions, and the LLM cache replays partial work without using quota.
 
-Usage: python -m eval.run --system ours --split dev [--limit N] [--run-id mid]
-Systems: b0 b1 b2 b2plus b3 ours a1 a2 a3 a4 a5 a7 a8 a10none a10oracle a11
+Questions run in a seeded order that interleaves the libraries (`run_order`), so
+a run cut short by the quota still covers every library in proportion. Every
+system uses the same order, so answers stay paired. `--qid-order` restores the
+old alphabetical order, which the `mid` run used.
+
+Usage: python -m eval.run --system ours --split dev [--limit N] [--run-id mid] [--qid-order]
+Systems: b0 b1 b2 b2plus b3 ours a1 a2 a3 a4 a5 a7 a8 a10none a10oracle a11, and e1-e6 (extension)
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import random
 import subprocess
 import sys
 import time
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable
 
@@ -27,6 +34,13 @@ from llm.types import QuotaExhausted
 from tools.workspace import Workspace, docker_session_factory
 
 EXIT_QUOTA = 3
+EXIT_REFUSED = 2
+
+
+def test_set_locked(prereg: Path | None = None) -> bool:
+    """The test set is touched only after gate G2: PREREGISTRATION.md must say LOCKED (CLAUDE.md §2.2)."""
+    path = prereg or (REPO_ROOT / "PREREGISTRATION.md")
+    return path.exists() and "**Status: LOCKED" in path.read_text(encoding="utf-8")
 
 # Each ablation is a config override: only control logic differs between systems (fairness, §2.3).
 SYSTEM_OVERRIDES: dict[str, dict[str, Any]] = {
@@ -42,7 +56,39 @@ SYSTEM_OVERRIDES: dict[str, dict[str, Any]] = {
     "a10none": {"agent": {"ablation": {"retrieval": "none"}}},
     "a10oracle": {"agent": {"ablation": {"retrieval": "oracle"}}},
     "a11": {"agent": {"ablation": {"constants_only": True}}},
+    # Exploratory multi-agent extension: each step adds one component (PREREGISTRATION.md).
+    "e1": {"multiagent": {"flags": {}}},
+    "e2": {"multiagent": {"flags": {"hybrid": True}}},
+    "e3": {"multiagent": {"flags": {"hybrid": True, "graph": True}}},
+    "e4": {"multiagent": {"flags": {"hybrid": True, "graph": True, "pairs": True}}},
+    "e5": {"multiagent": {"flags": {"hybrid": True, "graph": True, "pairs": True, "active": True}}},
+    "e6": {"multiagent": {"flags": {"hybrid": True, "graph": True, "pairs": True, "active": True, "mcp": True}}},
 }
+
+
+def run_order(questions: list[dict[str, Any]], seed: int) -> list[dict[str, Any]]:
+    """Seeded order in which every prefix holds each library in proportion to its size.
+
+    Why: sorted by qid, every click question comes before any marshmallow one, so the
+    `mid` run stopped on quota without reaching marshmallow. Each library's questions
+    are shuffled with a fixed seed (from qid order, so the input order does not
+    matter); then the next slot goes to the library furthest behind its share.
+    """
+    by_lib: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for q in sorted(questions, key=lambda q: q["qid"]):
+        by_lib[q["library"]].append(q)
+    rng = random.Random(seed)
+    for lib in sorted(by_lib):
+        rng.shuffle(by_lib[lib])
+    total = len(questions)
+    taken = {lib: 0 for lib in by_lib}
+    out: list[dict[str, Any]] = []
+    while len(out) < total:
+        open_ = [lib for lib in sorted(by_lib) if taken[lib] < len(by_lib[lib])]
+        lib = max(open_, key=lambda l: len(by_lib[l]) * (len(out) + 1) / total - taken[l])
+        out.append(by_lib[lib][taken[lib]])
+        taken[lib] += 1
+    return out
 
 
 def get_runner(system: str) -> Callable[..., dict[str, Any]]:
@@ -59,6 +105,9 @@ def get_runner(system: str) -> Callable[..., dict[str, Any]]:
     if system == "b3":
         from baselines.b3_cove import run
         return run
+    if system.startswith("e"):
+        from multiagent.orchestrator import run
+        return run
 
     def run_agent(question: str, workspace: Any, client: Any, config: dict[str, Any], tracer: Any = None,
                   material_override: str | None = None) -> dict[str, Any]:
@@ -72,7 +121,12 @@ def oracle_material(question: dict[str, Any], workspace: Workspace) -> str:
     so the workspace itself still has no access to gold."""
     parts = []
     for path in question["fix_source_files"]:
-        text = workspace.resolve(path).read_text(encoding="utf-8", errors="replace").splitlines()
+        target = workspace.resolve(path)
+        if not target.is_file():
+            # A file the fix created does not exist at the frozen commit, so there is nothing to show
+            # (seen on click-1484, whose fix added shell_completion.py).
+            continue
+        text = target.read_text(encoding="utf-8", errors="replace").splitlines()
         parts.append(f"[code] {path}\n" + "\n".join(f"{i:5d}  {ln}" for i, ln in enumerate(text[:800], 1)))
     return "\n\n".join(parts)
 
@@ -105,17 +159,26 @@ def run_question(system: str, question: dict[str, Any], config: dict[str, Any], 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--system", required=True, choices=sorted(SYSTEM_OVERRIDES))
-    ap.add_argument("--split", default="dev", choices=["dev", "test"])
+    ap.add_argument("--split", default="dev", choices=["dev", "test", "adversarial"])
     ap.add_argument("--limit", type=int)
     ap.add_argument("--run-id", default="mid")
     ap.add_argument("--allow-test", action="store_true", help="required to touch the test set (locked until G2)")
     ap.add_argument("--daily-guard", type=int, help="override our own requests-per-day guard, to learn the server's real limit")
+    ap.add_argument("--qid-order", action="store_true", help="alphabetical qid order, as the `mid` run used")
+    ap.add_argument("--qids-file", help="run only the qids listed in this file (one per line), e.g. data/ext_qids.txt")
     args = ap.parse_args(argv)
-    if args.split == "test" and not args.allow_test:
-        print("The test set is locked until gate G2. Refusing to run on it.", file=sys.stderr)
-        return 2
+    if args.split == "test" and not (args.allow_test and test_set_locked()):
+        print("The test set runs only with --allow-test, after gate G2 has marked PREREGISTRATION.md LOCKED. "
+              "Refusing to run on it.", file=sys.stderr)
+        return EXIT_REFUSED
     config = load_config([SYSTEM_OVERRIDES[args.system]])
-    questions = read_jsonl(REPO_ROOT / "data" / f"questions_{args.split}.jsonl")[: args.limit]
+    questions = read_jsonl(REPO_ROOT / "data" / f"questions_{args.split}.jsonl")
+    if not args.qid_order:
+        questions = run_order(questions, config["data"]["split_seed"])
+    if args.qids_file:
+        wanted = {line.strip() for line in (REPO_ROOT / args.qids_file).read_text().splitlines() if line.strip()}
+        questions = [q for q in questions if q["qid"] in wanted]
+    questions = questions[: args.limit]
     out_dir = REPO_ROOT / config["paths"]["results_dir"] / args.run_id / args.system
     out_dir.mkdir(parents=True, exist_ok=True)
     trace_path = REPO_ROOT / config["paths"]["traces_dir"] / f"{args.run_id}_{args.system}.jsonl"
