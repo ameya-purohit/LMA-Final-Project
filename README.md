@@ -209,7 +209,8 @@ See [demo/README.md](demo/README.md) for what each page needs and a 5-minute dem
 ## Results
 
 The submitted report is [docs/final_report.pdf](docs/final_report.pdf) (8 pages, LaTeX source in
-[docs/report/final_report.tex](docs/report/final_report.tex)); a longer version is
+[docs/report/final_report.tex](docs/report/final_report.tex)); the A1 poster is
+[docs/poster/LMA_poster_TeamDisco82.pdf](docs/poster/LMA_poster_TeamDisco82.pdf) (editable `.pptx` alongside); a longer version is
 [docs/final_report.md](docs/final_report.md), and the detailed numbers are in
 [docs/results.md](docs/results.md), generated from `results/summary/analysis_main_test/report.md`. In short, on the
 145 test questions left after the spot check, the full procedure **did not beat** the ReAct agent with the same tools
