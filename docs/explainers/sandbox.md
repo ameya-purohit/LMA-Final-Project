@@ -23,6 +23,12 @@ frozen library must give the same result every time, on every machine, for every
   non-root user. The frozen library is mounted read-only at `/work/lib`. The host writes
   each job (probe files plus a `job.json`) into a scratch folder that is also mounted
   read-only. The host runs `docker exec ... runner.py job.json` and reads one JSON answer.
+  Job folders are **numbered** (`jobs/0001`, `jobs/0002`, ...) in the order the question creates them, not given
+  random names (D-52). A traceback can show a job's path, and that text goes back to the model. With random names, a
+  replayed question would send the model different text and miss the cache. With numbers, the replay is identical.
+- **Modified trees** (adversarial set, D-55). A question can name a `tree_variant`, a copy of the frozen tree with
+  planted text. The session mounts that copy instead. The plant is a trailing comment, so the code behaves exactly
+  as before.
 - **The runner** (`sandbox/runner.py`, trusted code we wrote). For each probe file it:
   1. imports it; an import error (for example a SyntaxError in a mutated library)
      becomes a `raise` outcome;

@@ -78,6 +78,14 @@ class _BaseSession:
         self.dist = {"name": dist_name or package, "version": detect_version(self.tree, package, self.source_root)}
         self.cpu_seconds = 0.0
         self.jobs_run = 0
+        self._seq = 0
+
+    def next_name(self) -> str:
+        """A scratch sub-directory name: a counter, not a random id (D-52). Paths of job files can appear in what a
+        model sees (a probe that prints its own traceback), so the same sequence of jobs must give the same paths,
+        or a replayed question misses the LLM cache. Each session has its own fresh scratch dir, so names never clash."""
+        self._seq += 1
+        return f"{self._seq:04d}"
 
     # path helpers ----------------------------------------------------------
     def to_inner(self, host_path: Path) -> str:
@@ -85,7 +93,7 @@ class _BaseSession:
 
     def job_dir(self) -> tuple[Path, str]:
         """A fresh directory for one job's files: (host path, path as the runner sees it)."""
-        d = self.scratch / "jobs" / uuid.uuid4().hex[:12]
+        d = self.scratch / "jobs" / self.next_name()
         d.mkdir(parents=True)
         os.chmod(d, 0o755)
         return d, self.to_inner(d)
