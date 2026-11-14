@@ -283,21 +283,27 @@ class OurAgent:
                 self._refuted(c)
 
     # ---- check 2: mutation
-    def _mutate(self, c: Claim, path: str, line: int) -> tuple[bool | None, str]:
+    def _mutate(self, c: Claim, path: str, line: int) -> tuple[bool | None, str, bool]:
+        """(causal, report text, untestable). causal is True (causal), False (rejected) or None (no
+        verdict: the budget is used up, or the line is untestable)."""
         out = self.registry.call("mutate_and_run", {"path": path, "line": line, "probe": c.probe, "controls": c.controls})
         if out.record.get("budget"):
-            return None, out.text
+            return None, out.text, False
         report = out.record.get("report")
+        if getattr(report, "untestable", False):
+            self.table.log("mutation_check", claim=c.id, loc=f"{path}:{line}", causal=None, untestable=True)
+            return None, out.text, True
         causal = bool(report and report.causal)
         self.table.log("mutation_check", claim=c.id, loc=f"{path}:{line}", causal=causal)
-        return causal, out.text
+        return causal, out.text, False
+
+    def _check_one(self, c: Claim, cit: Citation) -> str:
+        cit.causal, text, cit.untestable = self._mutate(c, cit.path, cit.line)
+        return text
 
     def _check_citations(self, package: str) -> None:
         for c in self.table.with_status("confirmed"):
-            reports = []
-            for cit in c.citations:
-                cit.causal, text = self._mutate(c, cit.path, cit.line)
-                reports.append(text)
+            reports = [self._check_one(c, cit) for cit in c.citations]
             if any(x.causal for x in c.citations):
                 # At least one citation decides the claim: drop the ones that do not.
                 dropped = [f"{x.path}:{x.line}" for x in c.citations if not x.causal]
@@ -307,11 +313,33 @@ class OurAgent:
                 continue
             if self.ab.get("flag_only"):
                 continue  # A3: no re-investigation
+            if c.citations and not any(x.causal is False for x in c.citations):
+                # Citations exist and none was rejected: each is untestable or unchecked (budget). Searching for
+                # another line would spend requests on a question the check cannot answer (D-47). A claim with
+                # no citation at all still goes on to the search below.
+                self.table.log("citations_without_verdict", claim=c.id,
+                               citations=[f"{x.path}:{x.line}" for x in c.citations],
+                               untestable=[f"{x.path}:{x.line}" for x in c.citations if x.untestable])
+                self._vacuity_step(c, package)
+                continue
             self._find_causal_line(c, reports)
             if not any(x.causal for x in c.citations):
                 self._vacuity_step(c, package)
 
     def _find_causal_line(self, c: Claim, reports: list[str]) -> None:
+        """Up to two proposals. If none is causal and the claim has no citation at all (a claim revised after a
+        refutation, or drafted uncited), it keeps the last proposed line with its verdict, exactly as a rejected
+        drafted line is kept (D-51): the answer still says where the agent thinks the behaviour is decided,
+        and `causal` shows that the check did not confirm it."""
+        rejected: list[Citation] = []
+        self._propose(c, reports, rejected)
+        if rejected and not c.citations:
+            last = rejected[-1]
+            c.citations = [last]
+            self.table.log("kept_proposed_citation", claim=c.id, loc=f"{last.path}:{last.line}",
+                           causal=last.causal, untestable=last.untestable)
+
+    def _propose(self, c: Claim, reports: list[str], seen: list[Citation]) -> None:
         for _ in range(2):
             if self.llm.remaining <= FINAL_RESERVE:
                 return
@@ -322,12 +350,13 @@ class OurAgent:
             parsed = self._ask(prompt, "propose_citation", read_tools=True)
             if parsed is None:
                 return
-            causal, text = self._mutate(c, parsed.path, parsed.line)
+            causal, text, untestable = self._mutate(c, parsed.path, parsed.line)
             reports.append(text)
             self.table.log("proposed_citation", claim=c.id, loc=f"{parsed.path}:{parsed.line}", causal=causal)
             if causal:
                 c.citations = [Citation(parsed.path, parsed.line, True)]
                 return
+            seen.append(Citation(parsed.path, parsed.line, causal, untestable))
 
     def _vacuity_step(self, c: Claim, package: str) -> None:
         """A confirmed claim with no causal citation: does its probe test anything at all?"""
@@ -351,7 +380,7 @@ class OurAgent:
                 r.status = "refuted"
             if c.status == "confirmed":
                 for cit in c.citations:
-                    cit.causal, _ = self._mutate(c, cit.path, cit.line)
+                    self._check_one(c, cit)
 
     # ----------------------------------------------------------------- the end
     def _finish(self, abstain_if_no_final: bool = False) -> dict[str, Any]:
@@ -363,7 +392,8 @@ class OurAgent:
         answer = parsed.answer_text if parsed else ""
         abstained = bool(parsed.abstained) if parsed else (abstain_if_no_final or not self.table.claims)
         claims = [{"text": c.text, "grade": c.grade, "scope": c.scope, "source_kind": c.source_kind, "status": c.status,
-                   "citations": [{"path": x.path, "line": x.line, "causal": x.causal} for x in c.citations],
+                   "citations": [{"path": x.path, "line": x.line, "causal": x.causal, "untestable": x.untestable}
+                                 for x in c.citations],
                    "observed_output": c.observed_output} for c in self.table.claims]
         conflicts_out = [{"doc_says": x.doc_says, "execution_shows": x.execution_shows, "decided_at": x.decided_at}
                          for x in self.table.conflicts]

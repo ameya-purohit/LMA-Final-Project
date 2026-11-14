@@ -172,7 +172,10 @@ class GeminiProvider:
 
     def __init__(self, api_key: str):
         from google import genai
-        self._client = genai.Client(api_key=api_key)
+        from google.genai import types
+        # Without a timeout a request whose reply never arrives blocks forever (it hung a batch run for
+        # four hours on 7 Nov). 120 s, as for Groq; a ReadTimeout is retried as a transient error (D-54).
+        self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=120_000))
 
     def call(self, model: str, messages: list[Message], tools: list[ToolSpec] | None,
              params: dict[str, Any]) -> Reply:

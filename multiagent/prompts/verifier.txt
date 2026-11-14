@@ -1,0 +1,25 @@
+Role: Causal Verifier.
+
+A developer asked:
+<question>
+{question}
+</question>
+
+Competing hypotheses:
+{hypotheses}
+
+Probe results on the frozen code:
+{observations}
+
+Mutation experiments (a line is "accepted" if mutating it changed the reproduce probe's outcome and left every control unchanged; "rejected" if no mutant changed the outcome; "inconclusive" otherwise):
+{experiments}
+
+Code at the tested lines:
+{snippets}
+
+Call submit_verdict:
+- For each hypothesis: accepted, rejected or inconclusive, from the experiments and observations, with a one-sentence reason. Accept at most one unless the evidence shows several lines act together.
+- answer_text: answer the developer's question about what this frozen code does and which line decides it. State as fact only what the probes and experiments support; say plainly what remains uncertain.
+- claims: the answer's atomic claims (at most 5), each citing the deciding line(s). Prefer accepted lines.
+- patch: optionally, a one-line replacement for the deciding line that would remove the reported behaviour (path, line, new_text), or leave it empty.
+- flagged_uncertain: true if the evidence does not settle the cause. abstained: true only if you cannot answer at all.

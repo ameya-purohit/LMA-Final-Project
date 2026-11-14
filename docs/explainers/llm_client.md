@@ -36,7 +36,16 @@ reply = client.complete(messages, tools, role="main")   # or role="judge"
 - **Daily limit.** The same SQLite file counts real requests per model per day (Pacific
   time, when Gemini's quota resets). At the configured `rpd`, the client raises
   `QuotaExhausted` *before* calling. Batch runs catch it, save state and exit.
+- **Several keys (D-50, D-53).** Each role lists its keys in config (`key_envs`): four team members' Gemini keys for
+  the main model and four Groq keys for the judge. Every key is a separate free-tier project with its own daily limit,
+  so the client keeps one daily counter per key (`gemini`, `gemini#2`, ...) and uses the first key that still has
+  quota. When a key's limit is reached, by our own counter or by the server's per-day 429, it moves to the next key.
+  Only when every key is used up does it raise `QuotaExhausted`. The model, prompts and settings are identical
+  whichever key is used, and the cache key leaves the API key out, so a reply cached under one key is reused under
+  any other.
 - **Pacing.** Requests are spaced at least 60/rpm seconds apart (4 s at 15 per minute).
+- **Timeouts (D-54).** Every request gives up after 120 seconds and counts as a transient error, so it is retried. Before
+  this fix, one Gemini reply that never arrived left a batch run waiting on an open connection for four hours.
 - **Retries.** A 429 (rate limit) or a 5xx (server overloaded) is retried with growing
   waits (2 s, 4 s, 8 s ... capped at 90 s, with random jitter), or after the delay the
   server asks for. But a 429 that says the **per-day** quota is used up is never retried:
@@ -67,6 +76,9 @@ Run on 2026-10-28: 3 Gemini requests (217 input, 29 output tokens) and 1 Groq re
 - **Temperature 0 is not perfectly deterministic** for API models. The cache hides
   this: a cached answer is replayed even if a fresh call might differ. Repeat runs
   (should-have tier) therefore need their own cache.
+- **Network failures still cost a question.** If the internet is down for longer than all the retries (about five
+  minutes), the question fails. It writes no result file, so the next resume runs it again, but the batch carries on
+  without it until then.
 - **The daily counter only knows our own requests.** Requests made from another machine
   with the same key are invisible to it; the server's per-day 429 is the backstop.
 - **Fixed-interval pacing** is slower than a sliding window when requests are bursty.

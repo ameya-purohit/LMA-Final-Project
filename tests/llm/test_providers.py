@@ -110,3 +110,15 @@ def test_groq_errors():
     e = groq.classify_error(_StatusError(429, "on tokens per minute (TPM): Limit 8000, Used 7000", {"retry-after": "3"}))
     assert not e.per_day and e.quota_id == "TPM" and e.retry_after == 3.0
     assert isinstance(groq.classify_error(_StatusError(502, "bad gateway")), TransientError)
+
+
+def test_gemini_requests_have_a_timeout():
+    """Regression (D-54): a reply that never arrives must time out and be retried, not block a batch run forever."""
+    from llm.providers.gemini import GeminiProvider, classify_error
+    provider = GeminiProvider("not-a-real-key")  # no request is made
+    assert provider._client._api_client._http_options.timeout == 120_000
+
+    class ReadTimeout(Exception):
+        pass
+    from llm.types import TransientError
+    assert isinstance(classify_error(ReadTimeout("timed out")), TransientError)

@@ -59,8 +59,11 @@ class FakeRegistry(ToolRegistry):
     def _fake_mutate(self, a):
         self.counts["mutation_checks"] += 1
         self.mutated.append((a.path, a.line))
-        return ToolResult("mutate_and_run", "mutation output",
-                          record={"report": SimpleNamespace(causal=self.mutations.get((a.path, a.line), False))})
+        verdict = self.mutations.get((a.path, a.line), False)
+        if verdict == "untestable":
+            self.counts["mutation_checks"] -= 1  # the real registry spends no check on an untestable line
+            return ToolResult("mutate_and_run", "UNTESTABLE", record={"report": SimpleNamespace(causal=False, untestable=True)})
+        return ToolResult("mutate_and_run", "mutation output", record={"report": SimpleNamespace(causal=verdict)})
 
 
 CLAIM = {"text": "clamp(-1) raises", "citations": [{"path": "src/toylib/core.py", "line": 88}]}
@@ -173,7 +176,7 @@ def test_non_causal_citation_reinvestigated_and_replaced():
     agent, client, reg = make([DRAFT, PROBE, propose, FINAL], [report()], {("src/toylib/core.py", 16): True})
     out = agent.answer("q?")
     c = out["claims"][0]
-    assert c["citations"] == [{"path": "src/toylib/core.py", "line": 16, "causal": True}] and c["grade"] == "E+C"
+    assert c["citations"] == [{"path": "src/toylib/core.py", "line": 16, "causal": True, "untestable": False}] and c["grade"] == "E+C"
 
 
 def test_some_causal_citations_drop_the_rest():
@@ -189,6 +192,67 @@ def test_no_causal_line_found_keeps_grade_e():
     agent._vacuity = lambda *a: SimpleNamespace(vacuous=False)
     out = agent.answer("q?")
     assert out["claims"][0]["grade"] == "E" and not out["flagged_uncertain"]
+
+
+def test_untestable_citation_is_kept_and_not_reinvestigated():
+    """D-47: no propose_citation request is made when nothing was rejected; the claim stays [E]."""
+    agent, client, reg = make([DRAFT, PROBE, FINAL], [report()], {("src/toylib/core.py", 88): "untestable"})
+    checked = []
+    agent._vacuity = lambda *a: (checked.append(a), SimpleNamespace(vacuous=False))[1]
+    out = agent.answer("q?")
+    c = out["claims"][0]
+    assert c["citations"] == [{"path": "src/toylib/core.py", "line": 88, "causal": None, "untestable": True}]
+    assert c["grade"] == "E" and len(checked) == 1, "the vacuity check still runs"
+    assert not client.replies and len(client.calls) == 3, "draft, probe, final: no re-investigation request"
+    assert any(d["decision"] == "citations_without_verdict" for d in agent.table.decisions)
+
+
+def test_claim_without_citations_still_searches_for_the_deciding_line():
+    """Regression (found in the pilot): the D-47 skip must not apply when the draft gave no citation at all."""
+    claim = dict(CLAIM, citations=[])
+    propose = call("propose_citation", claim_id=1, path="src/toylib/core.py", line=88)
+    agent, client, _ = make([call("submit_draft", answer="d", claims=[claim]), PROBE, propose, FINAL], [report()], CAUSAL)
+    out = agent.answer("q?")
+    assert out["claims"][0]["citations"] == [{"path": "src/toylib/core.py", "line": 88, "causal": True, "untestable": False}]
+    assert out["claims"][0]["grade"] == "E+C" and not client.replies
+
+
+def test_uncited_claim_keeps_its_last_rejected_proposal():
+    """D-51: a claim with no citation whose proposals are all rejected keeps the last one, marked not causal."""
+    claim = dict(CLAIM, citations=[])
+    p16 = call("propose_citation", claim_id=1, path="src/toylib/core.py", line=16)
+    p12 = call("propose_citation", claim_id=1, path="src/toylib/core.py", line=12)
+    agent, client, _ = make([call("submit_draft", answer="d", claims=[claim]), PROBE, p16, p12, FINAL], [report()], {})
+    agent._vacuity = lambda *a: SimpleNamespace(vacuous=False)
+    out = agent.answer("q?")
+    c = out["claims"][0]
+    assert c["citations"] == [{"path": "src/toylib/core.py", "line": 12, "causal": False, "untestable": False}]
+    assert c["grade"] == "E" and not client.replies
+    assert any(d["decision"] == "kept_proposed_citation" for d in agent.table.decisions)
+
+
+def test_rejected_proposal_does_not_replace_drafted_citations():
+    """D-51 only fills an empty claim; a claim with drafted (rejected) citations keeps them, as in D-35."""
+    propose = call("propose_citation", claim_id=1, path="src/toylib/core.py", line=16)
+    agent, client, _ = make([DRAFT, PROBE, propose, propose, FINAL], [report()], {})
+    agent._vacuity = lambda *a: SimpleNamespace(vacuous=False)
+    out = agent.answer("q?")
+    assert [x["line"] for x in out["claims"][0]["citations"]] == [88]
+
+
+def test_revise_schema_asks_for_a_citation():
+    from agent.claim_table import ClaimIn, ReviseClaim
+    want = ClaimIn.model_fields["citations"].description
+    assert want and ReviseClaim.model_fields["citations"].description == want
+
+
+def test_untestable_plus_rejected_citation_still_reinvestigates():
+    claim = dict(CLAIM, citations=[{"path": "src/toylib/core.py", "line": 88}, {"path": "src/toylib/core.py", "line": 12}])
+    propose = call("propose_citation", claim_id=1, path="src/toylib/core.py", line=16)
+    agent, client, _ = make([call("submit_draft", answer="d", claims=[claim]), PROBE, propose, FINAL], [report()],
+                            {("src/toylib/core.py", 88): "untestable", ("src/toylib/core.py", 16): True})
+    out = agent.answer("q?")
+    assert out["claims"][0]["citations"] == [{"path": "src/toylib/core.py", "line": 16, "causal": True, "untestable": False}]
 
 
 def test_vacuous_probe_regenerated_once():
