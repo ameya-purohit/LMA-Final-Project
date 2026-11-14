@@ -1,0 +1,1925 @@
+{
+ "summary": {
+  "a1": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 91,
+   "n_partial": 27,
+   "correctness": 0.6275862068965518,
+   "causally_supported": 0.3931034482758621,
+   "confident_error_rate": 0.36551724137931035,
+   "n_confident_errors": 53,
+   "coverage": 0.993103448275862,
+   "fix_location_recall": 0.6275862068965518,
+   "precision_vs_gold_lower_bound": 0.36423841059602646,
+   "requests_mean": 7.875862068965517,
+   "requests_median": 7,
+   "requests_max": 17,
+   "api_requests_total": 303,
+   "tokens_mean": 78106.56551724138,
+   "input_tokens_mean": 77202.53103448276,
+   "output_tokens_mean": 876.6620689655173,
+   "steps_mean": 4.793103448275862,
+   "probe_runs_mean": 0,
+   "mutant_runs_mean": 0,
+   "cpu_seconds_mean": 0.0,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 0
+  },
+  "a2": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 91,
+   "n_partial": 29,
+   "correctness": 0.6275862068965518,
+   "causally_supported": 0.4206896551724138,
+   "confident_error_rate": 0.30344827586206896,
+   "n_confident_errors": 44,
+   "coverage": 0.903448275862069,
+   "fix_location_recall": 0.6068965517241379,
+   "precision_vs_gold_lower_bound": 0.3613636363636364,
+   "requests_mean": 9.96551724137931,
+   "requests_median": 10,
+   "requests_max": 21,
+   "api_requests_total": 175,
+   "tokens_mean": 112734.50344827586,
+   "input_tokens_mean": 110794.84827586207,
+   "output_tokens_mean": 1912.2827586206897,
+   "steps_mean": 5.13103448275862,
+   "probe_runs_mean": 3.579310344827586,
+   "mutant_runs_mean": 0,
+   "cpu_seconds_mean": 0.8239586206896552,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 35
+  },
+  "a3": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 89,
+   "n_partial": 35,
+   "correctness": 0.6137931034482759,
+   "causally_supported": 0.4068965517241379,
+   "confident_error_rate": 0.2,
+   "n_confident_errors": 29,
+   "coverage": 0.6758620689655173,
+   "fix_location_recall": 0.6,
+   "precision_vs_gold_lower_bound": 0.3613053613053613,
+   "requests_mean": 8.524137931034483,
+   "requests_median": 8,
+   "requests_max": 16,
+   "api_requests_total": 124,
+   "tokens_mean": 87951.31034482758,
+   "input_tokens_mean": 86272.91034482759,
+   "output_tokens_mean": 1651.0275862068966,
+   "steps_mean": 4.786206896551724,
+   "probe_runs_mean": 2.986206896551724,
+   "mutant_runs_mean": 4.1931034482758625,
+   "cpu_seconds_mean": 2.8411310344827587,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 34
+  },
+  "b0": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 34,
+   "n_partial": 41,
+   "correctness": 0.23448275862068965,
+   "causally_supported": 0.04827586206896552,
+   "confident_error_rate": 0.3586206896551724,
+   "n_confident_errors": 52,
+   "coverage": 0.593103448275862,
+   "fix_location_recall": 0.034482758620689655,
+   "precision_vs_gold_lower_bound": 0.136986301369863,
+   "requests_mean": 1,
+   "requests_median": 1,
+   "requests_max": 1,
+   "api_requests_total": 145,
+   "tokens_mean": 1495.1241379310345,
+   "input_tokens_mean": 1305.8758620689655,
+   "output_tokens_mean": 189.24827586206897,
+   "steps_mean": 0,
+   "probe_runs_mean": 0,
+   "mutant_runs_mean": 0,
+   "cpu_seconds_mean": 0.0,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 0
+  },
+  "b1": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 55,
+   "n_partial": 64,
+   "correctness": 0.3793103448275862,
+   "causally_supported": 0.21379310344827587,
+   "confident_error_rate": 0.6137931034482759,
+   "n_confident_errors": 89,
+   "coverage": 0.993103448275862,
+   "fix_location_recall": 0.42758620689655175,
+   "precision_vs_gold_lower_bound": 0.31496062992125984,
+   "requests_mean": 1,
+   "requests_median": 1,
+   "requests_max": 1,
+   "api_requests_total": 145,
+   "tokens_mean": 5431.76551724138,
+   "input_tokens_mean": 5150.88275862069,
+   "output_tokens_mean": 280.88275862068963,
+   "steps_mean": 0,
+   "probe_runs_mean": 0,
+   "mutant_runs_mean": 0,
+   "cpu_seconds_mean": 0.0,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 0
+  },
+  "b2": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 99,
+   "n_partial": 25,
+   "correctness": 0.6827586206896552,
+   "causally_supported": 0.496551724137931,
+   "confident_error_rate": 0.31724137931034485,
+   "n_confident_errors": 46,
+   "coverage": 1.0,
+   "fix_location_recall": 0.6206896551724138,
+   "precision_vs_gold_lower_bound": 0.42134831460674155,
+   "requests_mean": 10.517241379310345,
+   "requests_median": 9,
+   "requests_max": 25,
+   "api_requests_total": 1491,
+   "tokens_mean": 119034.94482758621,
+   "input_tokens_mean": 117166.48965517241,
+   "output_tokens_mean": 1868.4551724137932,
+   "steps_mean": 3.579310344827586,
+   "probe_runs_mean": 4.993103448275862,
+   "mutant_runs_mean": 0.296551724137931,
+   "cpu_seconds_mean": 0.6505793103448276,
+   "valid_call_rate": 0.997370151216305,
+   "unsafe_attempts": 26
+  },
+  "ours": {
+   "n": 145,
+   "n_judged": 145,
+   "n_correct": 89,
+   "n_partial": 32,
+   "correctness": 0.6137931034482759,
+   "causally_supported": 0.4,
+   "confident_error_rate": 0.296551724137931,
+   "n_confident_errors": 43,
+   "coverage": 0.8620689655172413,
+   "fix_location_recall": 0.6,
+   "precision_vs_gold_lower_bound": 0.35730858468677495,
+   "requests_mean": 14.655172413793103,
+   "requests_median": 15,
+   "requests_max": 25,
+   "api_requests_total": 2069,
+   "tokens_mean": 185876.14482758622,
+   "input_tokens_mean": 183460.38620689654,
+   "output_tokens_mean": 2388.386206896552,
+   "steps_mean": 6.779310344827586,
+   "probe_runs_mean": 3.9448275862068964,
+   "mutant_runs_mean": 9.041379310344828,
+   "cpu_seconds_mean": 8.706834482758621,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 40
+  }
+ },
+ "hypotheses": {
+  "H1": {
+   "comparison": {
+    "n": 145,
+    "a_rate": 0.4,
+    "b_rate": 0.496551724137931,
+    "only_a": 17,
+    "only_b": 31,
+    "discordant": 48,
+    "p_value": 0.05946337525377034,
+    "diff": -0.09655172413793103,
+    "ci_low": -0.19310344827586207,
+    "ci_high": -0.006896551724137931
+   },
+   "verdict": "not supported (the baseline is better; CI below zero)",
+   "decomposition_correctness": {
+    "n": 145,
+    "a_rate": 0.6137931034482759,
+    "b_rate": 0.6827586206896552,
+    "only_a": 10,
+    "only_b": 20,
+    "discordant": 30,
+    "p_value": 0.09873714670538905,
+    "diff": -0.06896551724137931,
+    "ci_low": -0.14482758620689656,
+    "ci_high": 0.0
+   }
+  },
+  "H2": {
+   "confident_error_ours": 0.296551724137931,
+   "confident_error_b2": 0.31724137931034485,
+   "relative_reduction": 0.065217391304348,
+   "coverage_ours": 0.8620689655172413,
+   "coverage_b2": 1.0,
+   "comparison": {
+    "n": 145,
+    "a_rate": 0.296551724137931,
+    "b_rate": 0.31724137931034485,
+    "only_a": 16,
+    "only_b": 19,
+    "discordant": 35,
+    "p_value": 0.735878800856881,
+    "diff": -0.020689655172413793,
+    "ci_low": -0.10344827586206896,
+    "ci_high": 0.06206896551724138
+   },
+   "verdict": "inconclusive (95% CI of the difference includes zero)"
+  },
+  "H3": {
+   "label_source": "human consensus labels",
+   "comparison": {
+    "n_questions": 12,
+    "a_precision": 0.3055555555555556,
+    "b_precision": 0.4411764705882353,
+    "diff": -0.1356209150326797,
+    "ci_low": -0.2857142857142857,
+    "ci_high": -0.010416666666666683,
+    "a_citations": 36,
+    "b_citations": 34
+   },
+   "verdict": "not supported"
+  }
+ },
+ "human": {
+  "use_human_labels": {
+   "answer": true,
+   "citation": true
+  },
+  "scores": {
+   "ours": {
+    "click-2379": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2332": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1969": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "marshmallow-1506": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "marshmallow-2868": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2322": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-3487": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1692": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1160": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-676": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": false
+    },
+    "click-2356": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-3571": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    }
+   },
+   "a1": {
+    "marshmallow-1506": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2379": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-3487": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-676": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "marshmallow-2868": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-3571": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2332": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1160": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1969": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-1692": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2356": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2322": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    }
+   },
+   "b1": {
+    "marshmallow-1506": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-3487": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-3571": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2379": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-1160": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1692": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-676": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-1969": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "marshmallow-2868": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2332": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2356": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2322": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    }
+   },
+   "a2": {
+    "click-1969": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2332": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-3571": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-3487": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-676": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": false
+    },
+    "click-1160": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2356": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "marshmallow-2868": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "marshmallow-1506": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1692": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2322": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2379": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    }
+   },
+   "a3": {
+    "click-1969": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": false
+    },
+    "click-1160": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": false
+    },
+    "click-3487": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2379": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2356": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2332": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-676": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": false
+    },
+    "click-3571": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": false
+    },
+    "click-1692": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "marshmallow-2868": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2322": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "marshmallow-1506": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": false
+    }
+   },
+   "b2": {
+    "marshmallow-2868": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1969": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1692": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-676": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-3571": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-2332": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2356": {
+     "judged": true,
+     "correct": false,
+     "causally_supported": false,
+     "confident_error": true,
+     "covered": true
+    },
+    "click-3487": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2379": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-1160": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "click-2322": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": true,
+     "confident_error": false,
+     "covered": true
+    },
+    "marshmallow-1506": {
+     "judged": true,
+     "correct": true,
+     "causally_supported": false,
+     "confident_error": false,
+     "covered": true
+    }
+   }
+  },
+  "qids": [
+   "click-1160",
+   "click-1692",
+   "click-1969",
+   "click-2322",
+   "click-2332",
+   "click-2356",
+   "click-2379",
+   "click-3487",
+   "click-3571",
+   "click-676",
+   "marshmallow-1506",
+   "marshmallow-2868"
+  ]
+ },
+ "per_category": {
+  "ours": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.5465116279069767,
+    "causally_supported": 0.4069767441860465,
+    "confident_errors": 28
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.7142857142857143,
+    "causally_supported": 0.375,
+    "confident_errors": 14
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.6666666666666666,
+    "confident_errors": 1
+   }
+  },
+  "b0": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.1744186046511628,
+    "causally_supported": 0.03488372093023256,
+    "confident_errors": 29
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.32142857142857145,
+    "causally_supported": 0.07142857142857142,
+    "confident_errors": 23
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.3333333333333333,
+    "causally_supported": 0.0,
+    "confident_errors": 0
+   }
+  },
+  "b1": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.36046511627906974,
+    "causally_supported": 0.19767441860465115,
+    "confident_errors": 54
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.4107142857142857,
+    "causally_supported": 0.23214285714285715,
+    "confident_errors": 33
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.3333333333333333,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 2
+   }
+  },
+  "b2": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.6511627906976745,
+    "causally_supported": 0.47674418604651164,
+    "confident_errors": 30
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.7321428571428571,
+    "causally_supported": 0.5357142857142857,
+    "confident_errors": 15
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 1
+   }
+  },
+  "a1": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.5697674418604651,
+    "causally_supported": 0.37209302325581395,
+    "confident_errors": 36
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.7321428571428571,
+    "causally_supported": 0.42857142857142855,
+    "confident_errors": 15
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.3333333333333333,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 2
+   }
+  },
+  "a2": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.5348837209302325,
+    "causally_supported": 0.38372093023255816,
+    "confident_errors": 31
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.7857142857142857,
+    "causally_supported": 0.48214285714285715,
+    "confident_errors": 11
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.3333333333333333,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 2
+   }
+  },
+  "a3": {
+   "doc_related": {
+    "n": 86,
+    "n_judged": 86,
+    "correctness": 0.5465116279069767,
+    "causally_supported": 0.36046511627906974,
+    "confident_errors": 21
+   },
+   "single_location": {
+    "n": 56,
+    "n_judged": 56,
+    "correctness": 0.7142857142857143,
+    "causally_supported": 0.4642857142857143,
+    "confident_errors": 7
+   },
+   "spread_across_files": {
+    "n": 3,
+    "n_judged": 3,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.6666666666666666,
+    "confident_errors": 1
+   }
+  }
+ },
+ "per_library": {
+  "ours": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.616,
+    "causally_supported": 0.4,
+    "confident_errors": 36
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.6,
+    "causally_supported": 0.4,
+    "confident_errors": 7
+   }
+  },
+  "b0": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.224,
+    "causally_supported": 0.04,
+    "confident_errors": 46
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.3,
+    "causally_supported": 0.1,
+    "confident_errors": 6
+   }
+  },
+  "b1": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.376,
+    "causally_supported": 0.2,
+    "confident_errors": 77
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.4,
+    "causally_supported": 0.3,
+    "confident_errors": 12
+   }
+  },
+  "b2": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.688,
+    "causally_supported": 0.488,
+    "confident_errors": 39
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.65,
+    "causally_supported": 0.55,
+    "confident_errors": 7
+   }
+  },
+  "a1": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.64,
+    "causally_supported": 0.392,
+    "confident_errors": 44
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.55,
+    "causally_supported": 0.4,
+    "confident_errors": 9
+   }
+  },
+  "a2": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.616,
+    "causally_supported": 0.4,
+    "confident_errors": 39
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.7,
+    "causally_supported": 0.55,
+    "confident_errors": 5
+   }
+  },
+  "a3": {
+   "click": {
+    "n": 125,
+    "n_judged": 125,
+    "correctness": 0.624,
+    "causally_supported": 0.408,
+    "confident_errors": 23
+   },
+   "marshmallow": {
+    "n": 20,
+    "n_judged": 20,
+    "correctness": 0.55,
+    "causally_supported": 0.4,
+    "confident_errors": 6
+   }
+  }
+ },
+ "rq2": {
+  "checks": 862,
+  "untestable": 123,
+  "untestable_in_gold": 31,
+  "rules": {
+   "any_flip": {
+    "n": 739,
+    "accepted": 494,
+    "accepted_in_gold": 181,
+    "precision_vs_fix_lines": 0.36639676113360325,
+    "recall_vs_fix_lines": 0.6678966789667896,
+    "kappa_vs_fix_lines": -0.001
+   },
+   "behavioural": {
+    "n": 739,
+    "accepted": 411,
+    "accepted_in_gold": 152,
+    "precision_vs_fix_lines": 0.36982968369829683,
+    "recall_vs_fix_lines": 0.5608856088560885,
+    "kappa_vs_fix_lines": 0.007
+   },
+   "specific": {
+    "n": 739,
+    "accepted": 177,
+    "accepted_in_gold": 65,
+    "precision_vs_fix_lines": 0.3672316384180791,
+    "recall_vs_fix_lines": 0.23985239852398524,
+    "kappa_vs_fix_lines": 0.001
+   }
+  },
+  "human": {
+   "any_flip": {
+    "n": 52,
+    "agreement": 0.5576923076923077,
+    "kappa": 0.198
+   },
+   "behavioural": {
+    "n": 52,
+    "agreement": 0.5576923076923077,
+    "kappa": 0.167
+   },
+   "specific": {
+    "n": 52,
+    "agreement": 0.5192307692307693,
+    "kappa": -0.098
+   }
+  }
+ },
+ "taxonomy": {
+  "ours": {
+   "correct, not causally supported": 31,
+   "correct, causally supported": 58,
+   "right behaviour, wrong place": 22,
+   "right place, wrong or partial behaviour": 19,
+   "wrong behaviour and wrong place": 15
+  },
+  "b0": {
+   "correct, not causally supported": 27,
+   "wrong behaviour and wrong place": 11,
+   "right behaviour, wrong place": 39,
+   "abstained": 59,
+   "correct, causally supported": 7,
+   "right place, wrong or partial behaviour": 2
+  },
+  "b1": {
+   "correct, causally supported": 31,
+   "wrong behaviour and wrong place": 16,
+   "right behaviour, wrong place": 53,
+   "right place, wrong or partial behaviour": 21,
+   "correct, not causally supported": 24
+  },
+  "b2": {
+   "correct, not causally supported": 27,
+   "right behaviour, wrong place": 18,
+   "right place, wrong or partial behaviour": 16,
+   "correct, causally supported": 72,
+   "wrong behaviour and wrong place": 12
+  },
+  "a1": {
+   "correct, not causally supported": 34,
+   "right behaviour, wrong place": 19,
+   "correct, causally supported": 57,
+   "right place, wrong or partial behaviour": 19,
+   "wrong behaviour and wrong place": 16
+  },
+  "a2": {
+   "right place, wrong or partial behaviour": 15,
+   "correct, not causally supported": 30,
+   "wrong behaviour and wrong place": 17,
+   "right behaviour, wrong place": 22,
+   "correct, causally supported": 61
+  },
+  "a3": {
+   "correct, not causally supported": 30,
+   "right behaviour, wrong place": 24,
+   "right place, wrong or partial behaviour": 19,
+   "correct, causally supported": 59,
+   "wrong behaviour and wrong place": 13
+  }
+ },
+ "cases": [
+  {
+   "qid": "click-1082",
+   "winner": "ours",
+   "title": "Automatic short help should also take linebreak into account",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "The answer correctly describes the frozen behavior and points to the relevant code in utils.py that determines it.",
+   "b2_reason": "Identifies the observed behavior but does not pinpoint the missing line\u2011break handling that the fix added"
+  },
+  {
+   "qid": "click-1101",
+   "winner": "ours",
+   "title": "CliRunner prompt input echos twice on Python 2",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "The answer correctly identifies the double\u2011echo behavior and points to the visible_input write and EchoingStdin echo as the cause.",
+   "b2_reason": "Identifies the double\u2011echo behavior but incorrectly pins it on visible_input writing the value instead of EchoingStdin\u2019s echoing logic"
+  },
+  {
+   "qid": "click-1138",
+   "winner": "b2",
+   "title": "Progressbar regression: label no longer printed if output is not to a tty",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the same missing\u2011label behaviour and points to the hidden\u2011check and early\u2011return logic, but adds unrelated generator details and cites non\u2011existent lines.",
+   "b2_reason": "The answer correctly identifies the hidden\u2011output behavior and points to the is_hidden check and early returns that cause it."
+  },
+  {
+   "qid": "click-1267",
+   "winner": "b2",
+   "title": "Friendly __repr__ for Command",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the default __repr__ behavior but cites the wrong code location for the cause of that behavior",
+   "b2_reason": "The answer correctly identifies the default object __repr__ behavior and points to the BaseCommand/Command definitions lacking a __repr__ implementation."
+  },
+  {
+   "qid": "click-1285",
+   "winner": "b2",
+   "title": "Path(exists=True, envvar='FOO') tries to interpret FOO=\"\" as an existing path",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "It correctly describes the frozen behavior but points to the wrong code as the cause of the empty\u2011envvar handling",
+   "b2_reason": "The answer correctly describes the frozen behavior and points to the Option.value_from_envvar code that causes it."
+  },
+  {
+   "qid": "click-1422",
+   "winner": "ours",
+   "title": "Generated help with aliased group shows abbreviated command in usage",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "Answer correctly identifies the failing usage behavior and points to the return line in resolve_command as the cause",
+   "b2_reason": "Identifies the wrong usage behavior but points to the invoke code rather than the return line that actually decides the name"
+  },
+  {
+   "qid": "click-1465",
+   "winner": "ours",
+   "title": "Duplicate Boolean flag options \"--foo/--foo\" are not detected (defaults to False)",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "The answer correctly describes the frozen code\u2019s failure to raise and points to the option registration logic that causes the always\u2011False result.",
+   "b2_reason": "Identifies the duplicate\u2011flag behavior but does not pinpoint the exact missing validation that the fix added"
+  },
+  {
+   "qid": "click-1648",
+   "winner": "b2",
+   "title": "Progress bar does not display until after the first item is complete",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the missing initial display and the fast\u2011suppression cause, but adds unrelated update\u2011threshold claim",
+   "b2_reason": "The answer correctly identifies the frozen code\u2019s fast\u2011render suppression behavior and points to the short\u2011limit, is_fast, and render_progress logic that cause it."
+  },
+  {
+   "qid": "click-1806",
+   "winner": "b2",
+   "title": "Move iterable checks from type_cast_value to __init__",
+   "ours_label": "incorrect",
+   "b2_label": "correct",
+   "ours_reason": "The answer describes TypeError checks in type_cast_value, which does not match the frozen code's ValueError-related behavior described in the gold.",
+   "b2_reason": "The answer correctly identifies the current TypeError checks in type_cast_value and points to the lines that cause the behavior."
+  },
+  {
+   "qid": "click-1895",
+   "winner": "b2",
+   "title": "Click 8.0.0 `group.add_command(..)` does not replace name in description and when looking up defaults",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the observed behavior but points to the wrong code locations as the cause",
+   "b2_reason": "The answer correctly identifies the observed behavior and locates the cause in the resolve_command return line."
+  }
+ ],
+ "ablations": [
+  {
+   "id": "A1",
+   "prediction": "More confident errors on doc-related questions",
+   "observed": "doc-related confident errors: A1 36, ours 28",
+   "as_predicted": "yes"
+  },
+  {
+   "id": "A2",
+   "prediction": "Similar correctness; clearly lower causal citation precision",
+   "observed": "correctness A2 62.8%, ours 61.4%; precision vs fix lines (lower bound) A2 36.1%, ours 35.7%",
+   "as_predicted": "see H3"
+  },
+  {
+   "id": "A3",
+   "prediction": "Fewer confident errors than B2, lower correctness than ours",
+   "observed": "confident errors A3 20.0%, B2 31.7%; correctness A3 61.4%, ours 61.4%",
+   "as_predicted": "no"
+  },
+  {
+   "id": "A4",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A5",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A6",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A7",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A8",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A9",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A10",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A11",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  }
+ ],
+ "comparisons": {
+  "b0:causally_supported": {
+   "n": 145,
+   "a_rate": 0.4,
+   "b_rate": 0.04827586206896552,
+   "only_a": 54,
+   "only_b": 3,
+   "discordant": 57,
+   "p_value": 4.2901793229077607e-13,
+   "diff": 0.35172413793103446,
+   "ci_low": 0.2689655172413793,
+   "ci_high": 0.43448275862068964
+  },
+  "b0:correct": {
+   "n": 145,
+   "a_rate": 0.6137931034482759,
+   "b_rate": 0.23448275862068965,
+   "only_a": 60,
+   "only_b": 5,
+   "discordant": 65,
+   "p_value": 4.869560700851427e-13,
+   "diff": 0.3793103448275862,
+   "ci_low": 0.2896551724137931,
+   "ci_high": 0.4689655172413793
+  },
+  "b0:confident_error": {
+   "n": 145,
+   "a_rate": 0.296551724137931,
+   "b_rate": 0.3586206896551724,
+   "only_a": 24,
+   "only_b": 33,
+   "discordant": 57,
+   "p_value": 0.2892437471090205,
+   "diff": -0.06206896551724138,
+   "ci_low": -0.15862068965517243,
+   "ci_high": 0.041379310344827586
+  },
+  "b0:fix_location_hit": {
+   "n": 145,
+   "a_rate": 0.6,
+   "b_rate": 0.034482758620689655,
+   "only_a": 82,
+   "only_b": 0,
+   "discordant": 82,
+   "p_value": 4.1359030627651384e-25,
+   "diff": 0.5655172413793104,
+   "ci_low": 0.4827586206896552,
+   "ci_high": 0.6413793103448275
+  },
+  "b1:causally_supported": {
+   "n": 145,
+   "a_rate": 0.4,
+   "b_rate": 0.21379310344827587,
+   "only_a": 36,
+   "only_b": 9,
+   "discordant": 45,
+   "p_value": 6.57466324582856e-05,
+   "diff": 0.18620689655172415,
+   "ci_low": 0.10344827586206896,
+   "ci_high": 0.2689655172413793
+  },
+  "b1:correct": {
+   "n": 145,
+   "a_rate": 0.6137931034482759,
+   "b_rate": 0.3793103448275862,
+   "only_a": 40,
+   "only_b": 6,
+   "discordant": 46,
+   "p_value": 3.1028037028590916e-07,
+   "diff": 0.23448275862068965,
+   "ci_low": 0.15172413793103448,
+   "ci_high": 0.31724137931034485
+  },
+  "b1:confident_error": {
+   "n": 145,
+   "a_rate": 0.296551724137931,
+   "b_rate": 0.6137931034482759,
+   "only_a": 5,
+   "only_b": 51,
+   "discordant": 56,
+   "p_value": 1.170292474039769e-10,
+   "diff": -0.31724137931034485,
+   "ci_low": -0.4068965517241379,
+   "ci_high": -0.22758620689655173
+  },
+  "b1:fix_location_hit": {
+   "n": 145,
+   "a_rate": 0.6,
+   "b_rate": 0.42758620689655175,
+   "only_a": 32,
+   "only_b": 7,
+   "discordant": 39,
+   "p_value": 7.025478407740593e-05,
+   "diff": 0.1724137931034483,
+   "ci_low": 0.0896551724137931,
+   "ci_high": 0.2482758620689655
+  },
+  "b2:causally_supported": {
+   "n": 145,
+   "a_rate": 0.4,
+   "b_rate": 0.496551724137931,
+   "only_a": 17,
+   "only_b": 31,
+   "discordant": 48,
+   "p_value": 0.05946337525377034,
+   "diff": -0.09655172413793103,
+   "ci_low": -0.19310344827586207,
+   "ci_high": -0.006896551724137931
+  },
+  "b2:correct": {
+   "n": 145,
+   "a_rate": 0.6137931034482759,
+   "b_rate": 0.6827586206896552,
+   "only_a": 10,
+   "only_b": 20,
+   "discordant": 30,
+   "p_value": 0.09873714670538905,
+   "diff": -0.06896551724137931,
+   "ci_low": -0.14482758620689656,
+   "ci_high": 0.0
+  },
+  "b2:confident_error": {
+   "n": 145,
+   "a_rate": 0.296551724137931,
+   "b_rate": 0.31724137931034485,
+   "only_a": 16,
+   "only_b": 19,
+   "discordant": 35,
+   "p_value": 0.735878800856881,
+   "diff": -0.020689655172413793,
+   "ci_low": -0.10344827586206896,
+   "ci_high": 0.06206896551724138
+  },
+  "b2:fix_location_hit": {
+   "n": 145,
+   "a_rate": 0.6,
+   "b_rate": 0.6206896551724138,
+   "only_a": 11,
+   "only_b": 14,
+   "discordant": 25,
+   "p_value": 0.6900379657745361,
+   "diff": -0.020689655172413793,
+   "ci_low": -0.0896551724137931,
+   "ci_high": 0.04827586206896552
+  },
+  "a1:causally_supported": {
+   "n": 145,
+   "a_rate": 0.4,
+   "b_rate": 0.3931034482758621,
+   "only_a": 13,
+   "only_b": 12,
+   "discordant": 25,
+   "p_value": 1.0,
+   "diff": 0.006896551724137931,
+   "ci_low": -0.06206896551724138,
+   "ci_high": 0.06896551724137931
+  },
+  "a1:correct": {
+   "n": 145,
+   "a_rate": 0.6137931034482759,
+   "b_rate": 0.6275862068965518,
+   "only_a": 12,
+   "only_b": 14,
+   "discordant": 26,
+   "p_value": 0.8450189828872681,
+   "diff": -0.013793103448275862,
+   "ci_low": -0.08275862068965517,
+   "ci_high": 0.05517241379310345
+  },
+  "a1:confident_error": {
+   "n": 145,
+   "a_rate": 0.296551724137931,
+   "b_rate": 0.36551724137931035,
+   "only_a": 12,
+   "only_b": 22,
+   "discordant": 34,
+   "p_value": 0.12144948495551944,
+   "diff": -0.06896551724137931,
+   "ci_low": -0.14482758620689656,
+   "ci_high": 0.006896551724137931
+  },
+  "a1:fix_location_hit": {
+   "n": 145,
+   "a_rate": 0.6,
+   "b_rate": 0.6275862068965518,
+   "only_a": 3,
+   "only_b": 7,
+   "discordant": 10,
+   "p_value": 0.34375,
+   "diff": -0.027586206896551724,
+   "ci_low": -0.06896551724137931,
+   "ci_high": 0.013793103448275862
+  },
+  "a2:causally_supported": {
+   "n": 145,
+   "a_rate": 0.4,
+   "b_rate": 0.4206896551724138,
+   "only_a": 11,
+   "only_b": 14,
+   "discordant": 25,
+   "p_value": 0.6900379657745361,
+   "diff": -0.020689655172413793,
+   "ci_low": -0.0896551724137931,
+   "ci_high": 0.04827586206896552
+  },
+  "a2:correct": {
+   "n": 145,
+   "a_rate": 0.6137931034482759,
+   "b_rate": 0.6275862068965518,
+   "only_a": 7,
+   "only_b": 9,
+   "discordant": 16,
+   "p_value": 0.803619384765625,
+   "diff": -0.013793103448275862,
+   "ci_low": -0.06896551724137931,
+   "ci_high": 0.041379310344827586
+  },
+  "a2:confident_error": {
+   "n": 145,
+   "a_rate": 0.296551724137931,
+   "b_rate": 0.30344827586206896,
+   "only_a": 9,
+   "only_b": 10,
+   "discordant": 19,
+   "p_value": 1.0,
+   "diff": -0.006896551724137931,
+   "ci_low": -0.06206896551724138,
+   "ci_high": 0.05517241379310345
+  },
+  "a2:fix_location_hit": {
+   "n": 145,
+   "a_rate": 0.6,
+   "b_rate": 0.6068965517241379,
+   "only_a": 3,
+   "only_b": 4,
+   "discordant": 7,
+   "p_value": 1.0,
+   "diff": -0.006896551724137931,
+   "ci_low": -0.041379310344827586,
+   "ci_high": 0.027586206896551724
+  },
+  "a3:causally_supported": {
+   "n": 145,
+   "a_rate": 0.4,
+   "b_rate": 0.4068965517241379,
+   "only_a": 11,
+   "only_b": 12,
+   "discordant": 23,
+   "p_value": 1.0,
+   "diff": -0.006896551724137931,
+   "ci_low": -0.06896551724137931,
+   "ci_high": 0.05517241379310345
+  },
+  "a3:correct": {
+   "n": 145,
+   "a_rate": 0.6137931034482759,
+   "b_rate": 0.6137931034482759,
+   "only_a": 8,
+   "only_b": 8,
+   "discordant": 16,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": -0.05517241379310345,
+   "ci_high": 0.05517241379310345
+  },
+  "a3:confident_error": {
+   "n": 145,
+   "a_rate": 0.296551724137931,
+   "b_rate": 0.2,
+   "only_a": 18,
+   "only_b": 4,
+   "discordant": 22,
+   "p_value": 0.004343509674072266,
+   "diff": 0.09655172413793103,
+   "ci_low": 0.041379310344827586,
+   "ci_high": 0.15862068965517243
+  },
+  "a3:fix_location_hit": {
+   "n": 145,
+   "a_rate": 0.6,
+   "b_rate": 0.6,
+   "only_a": 3,
+   "only_b": 3,
+   "discordant": 6,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": -0.034482758620689655,
+   "ci_high": 0.034482758620689655
+  }
+ },
+ "tool_use": {
+  "ours": {
+   "tool_calls": 3599,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 45,
+   "recovered": 19,
+   "recovery_rate": 0.4222222222222222,
+   "probe_outcomes": {
+    "pass": 411,
+    "fail": 73,
+    "blocked": 36,
+    "error": 84
+   },
+   "probes_submitted": 604,
+   "probe_verdict_rate": 0.852112676056338,
+   "unsafe_attempts": 40,
+   "questions_with_unsafe": 14,
+   "unsafe_attempt_rate": 0.059602649006622516,
+   "blocked_rules": {
+    "introspection_escape": 2,
+    "dynamic_code": 3,
+    "write_outside_tmp": 27,
+    "blocked_call": 34,
+    "blocked_import": 6,
+    "dynamic_attribute": 2
+   },
+   "unsafe_executed": 0
+  },
+  "b0": {
+   "tool_calls": 145,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 0,
+   "recovered": 0,
+   "recovery_rate": null,
+   "probe_outcomes": {},
+   "probes_submitted": 0,
+   "probe_verdict_rate": null,
+   "unsafe_attempts": 0,
+   "questions_with_unsafe": 0,
+   "unsafe_attempt_rate": null,
+   "blocked_rules": {},
+   "unsafe_executed": 0
+  },
+  "b1": {
+   "tool_calls": 145,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 0,
+   "recovered": 0,
+   "recovery_rate": null,
+   "probe_outcomes": {},
+   "probes_submitted": 0,
+   "probe_verdict_rate": null,
+   "unsafe_attempts": 0,
+   "questions_with_unsafe": 0,
+   "unsafe_attempt_rate": null,
+   "blocked_rules": {},
+   "unsafe_executed": 0
+  },
+  "b2": {
+   "tool_calls": 1521,
+   "invalid": 4,
+   "valid_call_rate": 0.997370151216305,
+   "errors": 112,
+   "recovered": 12,
+   "recovery_rate": 0.10714285714285714,
+   "probe_outcomes": {
+    "pass": 433,
+    "fail": 159,
+    "error": 77,
+    "budget": 40,
+    "blocked": 26
+   },
+   "probes_submitted": 695,
+   "probe_verdict_rate": 0.8849028400597907,
+   "unsafe_attempts": 26,
+   "questions_with_unsafe": 9,
+   "unsafe_attempt_rate": 0.03741007194244604,
+   "blocked_rules": {
+    "blocked_call": 14,
+    "write_outside_tmp": 17,
+    "dynamic_attribute": 1,
+    "blocked_import": 2
+   },
+   "unsafe_executed": 0
+  },
+  "a1": {
+   "tool_calls": 1142,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 0,
+   "recovered": 0,
+   "recovery_rate": null,
+   "probe_outcomes": {},
+   "probes_submitted": 0,
+   "probe_verdict_rate": null,
+   "unsafe_attempts": 0,
+   "questions_with_unsafe": 0,
+   "unsafe_attempt_rate": null,
+   "blocked_rules": {},
+   "unsafe_executed": 0
+  },
+  "a2": {
+   "tool_calls": 1999,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 35,
+   "recovered": 13,
+   "recovery_rate": 0.37142857142857144,
+   "probe_outcomes": {
+    "pass": 367,
+    "fail": 68,
+    "error": 80,
+    "blocked": 31
+   },
+   "probes_submitted": 546,
+   "probe_verdict_rate": 0.8446601941747572,
+   "unsafe_attempts": 35,
+   "questions_with_unsafe": 13,
+   "unsafe_attempt_rate": 0.056776556776556776,
+   "blocked_rules": {
+    "dynamic_code": 3,
+    "write_outside_tmp": 21,
+    "blocked_call": 29,
+    "blocked_import": 6,
+    "dynamic_attribute": 2
+   },
+   "unsafe_executed": 0
+  },
+  "a3": {
+   "tool_calls": 2072,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 36,
+   "recovered": 12,
+   "recovery_rate": 0.3333333333333333,
+   "probe_outcomes": {
+    "pass": 314,
+    "fail": 51,
+    "error": 64,
+    "blocked": 30
+   },
+   "probes_submitted": 459,
+   "probe_verdict_rate": 0.8508158508158508,
+   "unsafe_attempts": 34,
+   "questions_with_unsafe": 12,
+   "unsafe_attempt_rate": 0.06535947712418301,
+   "blocked_rules": {
+    "dynamic_code": 3,
+    "write_outside_tmp": 21,
+    "blocked_call": 29,
+    "blocked_import": 5,
+    "dynamic_attribute": 2
+   },
+   "unsafe_executed": 0
+  }
+ },
+ "questions": [
+  "click-1064",
+  "click-1082",
+  "click-1096",
+  "click-1101",
+  "click-1110",
+  "click-1125",
+  "click-1138",
+  "click-1139",
+  "click-1160",
+  "click-1178",
+  "click-1245",
+  "click-1253",
+  "click-1267",
+  "click-1272",
+  "click-1285",
+  "click-1339",
+  "click-1359",
+  "click-1376",
+  "click-1381",
+  "click-1394",
+  "click-1422",
+  "click-1446",
+  "click-1465",
+  "click-1475",
+  "click-1484",
+  "click-1538",
+  "click-1548",
+  "click-1565",
+  "click-1568",
+  "click-1603",
+  "click-1605",
+  "click-1629",
+  "click-1648",
+  "click-1649",
+  "click-1692",
+  "click-1732",
+  "click-1739",
+  "click-1806",
+  "click-1849",
+  "click-1871",
+  "click-1886",
+  "click-1895",
+  "click-1899",
+  "click-1903",
+  "click-1921",
+  "click-1925",
+  "click-1929",
+  "click-1963",
+  "click-1969",
+  "click-1971",
+  "click-1978",
+  "click-2001",
+  "click-2012",
+  "click-2072",
+  "click-2088",
+  "click-2089",
+  "click-2092",
+  "click-2099",
+  "click-2124",
+  "click-2131",
+  "click-2146",
+  "click-2168",
+  "click-2246",
+  "click-2263",
+  "click-2294",
+  "click-2322",
+  "click-2332",
+  "click-2356",
+  "click-2368",
+  "click-2379",
+  "click-2395",
+  "click-2415",
+  "click-2416",
+  "click-2447",
+  "click-2500",
+  "click-2609",
+  "click-2621",
+  "click-2632",
+  "click-2644",
+  "click-2682",
+  "click-2695",
+  "click-2697",
+  "click-2746",
+  "click-2790",
+  "click-2813",
+  "click-2817",
+  "click-2819",
+  "click-2832",
+  "click-2836",
+  "click-2865",
+  "click-2869",
+  "click-2894",
+  "click-2906",
+  "click-2939",
+  "click-2971",
+  "click-2995",
+  "click-3015",
+  "click-3019",
+  "click-3043",
+  "click-3069",
+  "click-3071",
+  "click-3084",
+  "click-3105",
+  "click-3121",
+  "click-3145",
+  "click-3242",
+  "click-3277",
+  "click-3298",
+  "click-3360",
+  "click-3487",
+  "click-3571",
+  "click-3572",
+  "click-3700",
+  "click-405",
+  "click-457",
+  "click-549",
+  "click-605",
+  "click-665",
+  "click-676",
+  "click-729",
+  "click-834",
+  "click-848",
+  "click-914",
+  "click-942",
+  "click-958",
+  "marshmallow-1350",
+  "marshmallow-1369",
+  "marshmallow-1497",
+  "marshmallow-1506",
+  "marshmallow-1522",
+  "marshmallow-1721",
+  "marshmallow-1744",
+  "marshmallow-1755",
+  "marshmallow-1865",
+  "marshmallow-2118",
+  "marshmallow-2149",
+  "marshmallow-2170",
+  "marshmallow-2245",
+  "marshmallow-2868",
+  "marshmallow-2869",
+  "marshmallow-2870",
+  "marshmallow-2891",
+  "marshmallow-2900",
+  "marshmallow-2936",
+  "marshmallow-2985"
+ ],
+ "figures": [
+  "fig_comparisons.png",
+  "fig_categories.png",
+  "fig_risk_coverage.png"
+ ]
+}

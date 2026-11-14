@@ -1,0 +1,821 @@
+{
+ "summary": {
+  "a10none": {
+   "n": 47,
+   "n_judged": 47,
+   "n_correct": 25,
+   "n_partial": 12,
+   "correctness": 0.5319148936170213,
+   "causally_supported": 0.3404255319148936,
+   "confident_error_rate": 0.3829787234042553,
+   "n_confident_errors": 18,
+   "coverage": 0.851063829787234,
+   "fix_location_recall": 0.44680851063829785,
+   "precision_vs_gold_lower_bound": 0.3,
+   "requests_mean": 14.170212765957446,
+   "requests_median": 14,
+   "requests_max": 21,
+   "api_requests_total": 666,
+   "tokens_mean": 128327.59574468085,
+   "input_tokens_mean": 126142.59574468085,
+   "output_tokens_mean": 2185,
+   "steps_mean": 6.829787234042553,
+   "probe_runs_mean": 3.851063829787234,
+   "mutant_runs_mean": 9,
+   "cpu_seconds_mean": 4.719404255319149,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 8
+  },
+  "a10oracle": {
+   "n": 47,
+   "n_judged": 47,
+   "n_correct": 24,
+   "n_partial": 13,
+   "correctness": 0.5106382978723404,
+   "causally_supported": 0.3617021276595745,
+   "confident_error_rate": 0.40425531914893614,
+   "n_confident_errors": 19,
+   "coverage": 0.8297872340425532,
+   "fix_location_recall": 0.5531914893617021,
+   "precision_vs_gold_lower_bound": 0.30578512396694213,
+   "requests_mean": 13.638297872340425,
+   "requests_median": 13,
+   "requests_max": 23,
+   "api_requests_total": 640,
+   "tokens_mean": 272616.6595744681,
+   "input_tokens_mean": 270366.4893617021,
+   "output_tokens_mean": 2249.978723404255,
+   "steps_mean": 5.787234042553192,
+   "probe_runs_mean": 3.9574468085106385,
+   "mutant_runs_mean": 6.617021276595745,
+   "cpu_seconds_mean": 6.431127659574468,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 5
+  },
+  "b2": {
+   "n": 47,
+   "n_judged": 47,
+   "n_correct": 29,
+   "n_partial": 9,
+   "correctness": 0.6170212765957447,
+   "causally_supported": 0.5106382978723404,
+   "confident_error_rate": 0.3829787234042553,
+   "n_confident_errors": 18,
+   "coverage": 1.0,
+   "fix_location_recall": 0.6170212765957447,
+   "precision_vs_gold_lower_bound": 0.43859649122807015,
+   "requests_mean": 9.936170212765957,
+   "requests_median": 9,
+   "requests_max": 25,
+   "api_requests_total": 0,
+   "tokens_mean": 109528.70212765958,
+   "input_tokens_mean": 107447.89361702128,
+   "output_tokens_mean": 2080.808510638298,
+   "steps_mean": 3.5531914893617023,
+   "probe_runs_mean": 4.468085106382978,
+   "mutant_runs_mean": 0.3191489361702128,
+   "cpu_seconds_mean": 0.5968085106382979,
+   "valid_call_rate": 0.9913606911447084,
+   "unsafe_attempts": 4
+  },
+  "ours": {
+   "n": 47,
+   "n_judged": 47,
+   "n_correct": 25,
+   "n_partial": 13,
+   "correctness": 0.5319148936170213,
+   "causally_supported": 0.3617021276595745,
+   "confident_error_rate": 0.3617021276595745,
+   "n_confident_errors": 17,
+   "coverage": 0.8723404255319149,
+   "fix_location_recall": 0.5957446808510638,
+   "precision_vs_gold_lower_bound": 0.3402777777777778,
+   "requests_mean": 14.914893617021276,
+   "requests_median": 15,
+   "requests_max": 24,
+   "api_requests_total": 19,
+   "tokens_mean": 187823.40425531915,
+   "input_tokens_mean": 185371.72340425532,
+   "output_tokens_mean": 2451.68085106383,
+   "steps_mean": 6.787234042553192,
+   "probe_runs_mean": 4.212765957446808,
+   "mutant_runs_mean": 9.127659574468085,
+   "cpu_seconds_mean": 6.063893617021277,
+   "valid_call_rate": 1.0,
+   "unsafe_attempts": 9
+  }
+ },
+ "hypotheses": {
+  "H1": {
+   "comparison": {
+    "n": 47,
+    "a_rate": 0.3617021276595745,
+    "b_rate": 0.5106382978723404,
+    "only_a": 5,
+    "only_b": 12,
+    "discordant": 17,
+    "p_value": 0.143463134765625,
+    "diff": -0.14893617021276595,
+    "ci_low": -0.3191489361702128,
+    "ci_high": 0.02127659574468085
+   },
+   "verdict": "inconclusive (95% CI includes zero)",
+   "decomposition_correctness": {
+    "n": 47,
+    "a_rate": 0.5319148936170213,
+    "b_rate": 0.6170212765957447,
+    "only_a": 3,
+    "only_b": 7,
+    "discordant": 10,
+    "p_value": 0.34375,
+    "diff": -0.0851063829787234,
+    "ci_low": -0.2127659574468085,
+    "ci_high": 0.0425531914893617
+   }
+  },
+  "H2": {
+   "confident_error_ours": 0.3617021276595745,
+   "confident_error_b2": 0.3829787234042553,
+   "relative_reduction": 0.05555555555555547,
+   "coverage_ours": 0.8723404255319149,
+   "coverage_b2": 1.0,
+   "comparison": {
+    "n": 47,
+    "a_rate": 0.3617021276595745,
+    "b_rate": 0.3829787234042553,
+    "only_a": 7,
+    "only_b": 8,
+    "discordant": 15,
+    "p_value": 1.0,
+    "diff": -0.02127659574468085,
+    "ci_low": -0.19148936170212766,
+    "ci_high": 0.14893617021276595
+   },
+   "verdict": "inconclusive (95% CI of the difference includes zero)"
+  }
+ },
+ "human": null,
+ "per_category": {
+  "ours": {
+   "doc_related": {
+    "n": 25,
+    "n_judged": 25,
+    "correctness": 0.44,
+    "causally_supported": 0.28,
+    "confident_errors": 10
+   },
+   "single_location": {
+    "n": 21,
+    "n_judged": 21,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.47619047619047616,
+    "confident_errors": 6
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 0.0,
+    "causally_supported": 0.0,
+    "confident_errors": 1
+   }
+  },
+  "b2": {
+   "doc_related": {
+    "n": 25,
+    "n_judged": 25,
+    "correctness": 0.48,
+    "causally_supported": 0.44,
+    "confident_errors": 13
+   },
+   "single_location": {
+    "n": 21,
+    "n_judged": 21,
+    "correctness": 0.8095238095238095,
+    "causally_supported": 0.6190476190476191,
+    "confident_errors": 4
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 0.0,
+    "causally_supported": 0.0,
+    "confident_errors": 1
+   }
+  },
+  "a10none": {
+   "doc_related": {
+    "n": 25,
+    "n_judged": 25,
+    "correctness": 0.36,
+    "causally_supported": 0.16,
+    "confident_errors": 12
+   },
+   "single_location": {
+    "n": 21,
+    "n_judged": 21,
+    "correctness": 0.7619047619047619,
+    "causally_supported": 0.5714285714285714,
+    "confident_errors": 5
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 0.0,
+    "causally_supported": 0.0,
+    "confident_errors": 1
+   }
+  },
+  "a10oracle": {
+   "doc_related": {
+    "n": 25,
+    "n_judged": 25,
+    "correctness": 0.4,
+    "causally_supported": 0.2,
+    "confident_errors": 12
+   },
+   "single_location": {
+    "n": 21,
+    "n_judged": 21,
+    "correctness": 0.6666666666666666,
+    "causally_supported": 0.5714285714285714,
+    "confident_errors": 6
+   },
+   "spread_across_files": {
+    "n": 1,
+    "n_judged": 1,
+    "correctness": 0.0,
+    "causally_supported": 0.0,
+    "confident_errors": 1
+   }
+  }
+ },
+ "per_library": {
+  "ours": {
+   "click": {
+    "n": 41,
+    "n_judged": 41,
+    "correctness": 0.4878048780487805,
+    "causally_supported": 0.34146341463414637,
+    "confident_errors": 16
+   },
+   "marshmallow": {
+    "n": 6,
+    "n_judged": 6,
+    "correctness": 0.8333333333333334,
+    "causally_supported": 0.5,
+    "confident_errors": 1
+   }
+  },
+  "b2": {
+   "click": {
+    "n": 41,
+    "n_judged": 41,
+    "correctness": 0.5853658536585366,
+    "causally_supported": 0.4878048780487805,
+    "confident_errors": 17
+   },
+   "marshmallow": {
+    "n": 6,
+    "n_judged": 6,
+    "correctness": 0.8333333333333334,
+    "causally_supported": 0.6666666666666666,
+    "confident_errors": 1
+   }
+  },
+  "a10none": {
+   "click": {
+    "n": 41,
+    "n_judged": 41,
+    "correctness": 0.5365853658536586,
+    "causally_supported": 0.34146341463414637,
+    "confident_errors": 16
+   },
+   "marshmallow": {
+    "n": 6,
+    "n_judged": 6,
+    "correctness": 0.5,
+    "causally_supported": 0.3333333333333333,
+    "confident_errors": 2
+   }
+  },
+  "a10oracle": {
+   "click": {
+    "n": 41,
+    "n_judged": 41,
+    "correctness": 0.5121951219512195,
+    "causally_supported": 0.34146341463414637,
+    "confident_errors": 16
+   },
+   "marshmallow": {
+    "n": 6,
+    "n_judged": 6,
+    "correctness": 0.5,
+    "causally_supported": 0.5,
+    "confident_errors": 3
+   }
+  }
+ },
+ "rq2": {
+  "checks": 297,
+  "untestable": 52,
+  "untestable_in_gold": 13,
+  "rules": {
+   "any_flip": {
+    "n": 245,
+    "accepted": 161,
+    "accepted_in_gold": 44,
+    "precision_vs_fix_lines": 0.2732919254658385,
+    "recall_vs_fix_lines": 0.6197183098591549,
+    "kappa_vs_fix_lines": -0.038
+   },
+   "behavioural": {
+    "n": 245,
+    "accepted": 134,
+    "accepted_in_gold": 42,
+    "precision_vs_fix_lines": 0.31343283582089554,
+    "recall_vs_fix_lines": 0.5915492957746479,
+    "kappa_vs_fix_lines": 0.05
+   },
+   "specific": {
+    "n": 245,
+    "accepted": 62,
+    "accepted_in_gold": 25,
+    "precision_vs_fix_lines": 0.4032258064516129,
+    "recall_vs_fix_lines": 0.352112676056338,
+    "kappa_vs_fix_lines": 0.145
+   }
+  }
+ },
+ "taxonomy": {
+  "ours": {
+   "right behaviour, wrong place": 8,
+   "correct, not causally supported": 8,
+   "right place, wrong or partial behaviour": 7,
+   "wrong behaviour and wrong place": 7,
+   "correct, causally supported": 17
+  },
+  "b2": {
+   "right behaviour, wrong place": 5,
+   "correct, not causally supported": 5,
+   "right place, wrong or partial behaviour": 7,
+   "correct, causally supported": 24,
+   "wrong behaviour and wrong place": 6
+  },
+  "a10none": {
+   "right behaviour, wrong place": 10,
+   "correct, not causally supported": 9,
+   "right place, wrong or partial behaviour": 4,
+   "correct, causally supported": 16,
+   "wrong behaviour and wrong place": 8
+  },
+  "a10oracle": {
+   "right behaviour, wrong place": 12,
+   "correct, not causally supported": 7,
+   "right place, wrong or partial behaviour": 6,
+   "correct, causally supported": 17,
+   "wrong behaviour and wrong place": 5
+  }
+ },
+ "cases": [
+  {
+   "qid": "click-1969",
+   "winner": "b2",
+   "title": "Empty default value in --help output for option with multiple=True",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the observed empty default output but points to the wrong code locations for the root cause",
+   "b2_reason": "The answer correctly describes the frozen behavior and points to the code lines that cause the empty default to be shown"
+  },
+  {
+   "qid": "click-2263",
+   "winner": "b2",
+   "title": "Mark parameter as deprecated",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the lack of deprecation support but cites the wrong code location for the cause",
+   "b2_reason": "The answer correctly identifies the missing deprecated argument causing the TypeError and points to the __init__ signature where it is defined."
+  },
+  {
+   "qid": "click-2356",
+   "winner": "b2",
+   "title": "`show_choices=False` seems to have no effect",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the observed no\u2011effect behavior but misplaces the cause in Option.get_help_record instead of Choice.get_metavar in types.py",
+   "b2_reason": "The answer correctly identifies that show_choices=False has no effect on help output and locates the cause in Choice.get_metavar, matching the frozen code behavior"
+  },
+  {
+   "qid": "click-2746",
+   "winner": "ours",
+   "title": "`flag_value` is not taken into account with `envvar`",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "The answer correctly describes the pre\u2011fix behavior and points to the code (resolve_envvar_value) that causes it.",
+   "b2_reason": "Identifies the observed integer conversion but cites the wrong code cause"
+  },
+  {
+   "qid": "click-2790",
+   "winner": "b2",
+   "title": "Nested command option shadowing `-h` prints wrong suggestion",
+   "ours_label": "incorrect",
+   "b2_label": "correct",
+   "ours_reason": "Answer does not identify the wrong help suggestion behavior nor locate the cause in exceptions.py",
+   "b2_reason": "The answer correctly identifies the faulty behavior and points to the exact code line that causes it."
+  },
+  {
+   "qid": "click-2906",
+   "winner": "ours",
+   "title": "Completion for commands in nested groups is broken in Click 8.2.0",
+   "ours_label": "correct",
+   "b2_label": "partial",
+   "ours_reason": "The answer correctly identifies the broken completion behavior and points to the faulty lines 570 and 589 that cause it.",
+   "b2_reason": "Identifies the broken behavior and the primary cause at lines 570\u2011571, but omits the additional faulty lines (589\u2011590) also changed by the fix."
+  },
+  {
+   "qid": "click-3084",
+   "winner": "b2",
+   "title": "Bug: Optional value not optional anymore",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the failing behavior and points to the core.py line that controls it, but adds incorrect details about parser behavior",
+   "b2_reason": "The answer correctly identifies the failing behavior and points to the line in core.py that determines it."
+  },
+  {
+   "qid": "click-3360",
+   "winner": "b2",
+   "title": "Empty output from `HelpFormatter.write_usage` for a program without arguments",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Identifies the empty\u2011line behavior but points to the wrong code location as the cause",
+   "b2_reason": "The answer correctly describes the empty\u2011line behavior and points to the unconditional newline write that causes it."
+  },
+  {
+   "qid": "marshmallow-1350",
+   "winner": "b2",
+   "title": "RFC: Change the way we store metadata?",
+   "ours_label": "partial",
+   "b2_label": "correct",
+   "ours_reason": "Answer mischaracterizes the frozen behavior and doesn't mention the failing test outcome",
+   "b2_reason": "The answer correctly identifies the frozen behavior and points to the lines that cause it."
+  },
+  {
+   "qid": "marshmallow-1369",
+   "winner": "ours",
+   "title": "Rename pass_many to pass_collection",
+   "ours_label": "correct",
+   "b2_label": "incorrect",
+   "ours_reason": "The answer correctly identifies the failing behavior and points to the code locations that handle the pass_many flag, which cause the error.",
+   "b2_reason": "The answer describes the intended use of pass_many but fails to identify the frozen code's TypeError caused by the unexpected 'pass_collection' argument"
+  }
+ ],
+ "ablations": [
+  {
+   "id": "A4",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A5",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A6",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A7",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A8",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A9",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  },
+  {
+   "id": "A11",
+   "prediction": "(see PREREGISTRATION.md)",
+   "observed": "not run",
+   "as_predicted": "n/a"
+  }
+ ],
+ "comparisons": {
+  "b2:causally_supported": {
+   "n": 47,
+   "a_rate": 0.3617021276595745,
+   "b_rate": 0.5106382978723404,
+   "only_a": 5,
+   "only_b": 12,
+   "discordant": 17,
+   "p_value": 0.143463134765625,
+   "diff": -0.14893617021276595,
+   "ci_low": -0.3191489361702128,
+   "ci_high": 0.02127659574468085
+  },
+  "b2:correct": {
+   "n": 47,
+   "a_rate": 0.5319148936170213,
+   "b_rate": 0.6170212765957447,
+   "only_a": 3,
+   "only_b": 7,
+   "discordant": 10,
+   "p_value": 0.34375,
+   "diff": -0.0851063829787234,
+   "ci_low": -0.2127659574468085,
+   "ci_high": 0.0425531914893617
+  },
+  "b2:confident_error": {
+   "n": 47,
+   "a_rate": 0.3617021276595745,
+   "b_rate": 0.3829787234042553,
+   "only_a": 7,
+   "only_b": 8,
+   "discordant": 15,
+   "p_value": 1.0,
+   "diff": -0.02127659574468085,
+   "ci_low": -0.19148936170212766,
+   "ci_high": 0.14893617021276595
+  },
+  "b2:fix_location_hit": {
+   "n": 47,
+   "a_rate": 0.5957446808510638,
+   "b_rate": 0.6170212765957447,
+   "only_a": 4,
+   "only_b": 5,
+   "discordant": 9,
+   "p_value": 1.0,
+   "diff": -0.02127659574468085,
+   "ci_low": -0.14893617021276595,
+   "ci_high": 0.10638297872340426
+  },
+  "a10none:causally_supported": {
+   "n": 47,
+   "a_rate": 0.3617021276595745,
+   "b_rate": 0.3404255319148936,
+   "only_a": 5,
+   "only_b": 4,
+   "discordant": 9,
+   "p_value": 1.0,
+   "diff": 0.02127659574468085,
+   "ci_low": -0.10638297872340426,
+   "ci_high": 0.14893617021276595
+  },
+  "a10none:correct": {
+   "n": 47,
+   "a_rate": 0.5319148936170213,
+   "b_rate": 0.5319148936170213,
+   "only_a": 5,
+   "only_b": 5,
+   "discordant": 10,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": -0.1276595744680851,
+   "ci_high": 0.1276595744680851
+  },
+  "a10none:confident_error": {
+   "n": 47,
+   "a_rate": 0.3617021276595745,
+   "b_rate": 0.3829787234042553,
+   "only_a": 6,
+   "only_b": 7,
+   "discordant": 13,
+   "p_value": 1.0,
+   "diff": -0.02127659574468085,
+   "ci_low": -0.1702127659574468,
+   "ci_high": 0.1276595744680851
+  },
+  "a10none:fix_location_hit": {
+   "n": 47,
+   "a_rate": 0.5957446808510638,
+   "b_rate": 0.44680851063829785,
+   "only_a": 7,
+   "only_b": 0,
+   "discordant": 7,
+   "p_value": 0.015625,
+   "diff": 0.14893617021276595,
+   "ci_low": 0.06382978723404255,
+   "ci_high": 0.2553191489361702
+  },
+  "a10oracle:causally_supported": {
+   "n": 47,
+   "a_rate": 0.3617021276595745,
+   "b_rate": 0.3617021276595745,
+   "only_a": 4,
+   "only_b": 4,
+   "discordant": 8,
+   "p_value": 1.0,
+   "diff": 0.0,
+   "ci_low": -0.10638297872340426,
+   "ci_high": 0.1276595744680851
+  },
+  "a10oracle:correct": {
+   "n": 47,
+   "a_rate": 0.5319148936170213,
+   "b_rate": 0.5106382978723404,
+   "only_a": 4,
+   "only_b": 3,
+   "discordant": 7,
+   "p_value": 1.0,
+   "diff": 0.02127659574468085,
+   "ci_low": -0.0851063829787234,
+   "ci_high": 0.1276595744680851
+  },
+  "a10oracle:confident_error": {
+   "n": 47,
+   "a_rate": 0.3617021276595745,
+   "b_rate": 0.40425531914893614,
+   "only_a": 6,
+   "only_b": 8,
+   "discordant": 14,
+   "p_value": 0.79052734375,
+   "diff": -0.0425531914893617,
+   "ci_low": -0.19148936170212766,
+   "ci_high": 0.10638297872340426
+  },
+  "a10oracle:fix_location_hit": {
+   "n": 47,
+   "a_rate": 0.5957446808510638,
+   "b_rate": 0.5531914893617021,
+   "only_a": 5,
+   "only_b": 3,
+   "discordant": 8,
+   "p_value": 0.7265625,
+   "diff": 0.0425531914893617,
+   "ci_low": -0.06382978723404255,
+   "ci_high": 0.1702127659574468
+  }
+ },
+ "tool_use": {
+  "ours": {
+   "tool_calls": 1198,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 9,
+   "recovered": 6,
+   "recovery_rate": 0.6666666666666666,
+   "probe_outcomes": {
+    "pass": 146,
+    "fail": 29,
+    "blocked": 9,
+    "error": 23
+   },
+   "probes_submitted": 207,
+   "probe_verdict_rate": 0.8838383838383839,
+   "unsafe_attempts": 9,
+   "questions_with_unsafe": 6,
+   "unsafe_attempt_rate": 0.043478260869565216,
+   "blocked_rules": {
+    "introspection_escape": 2,
+    "dynamic_code": 3,
+    "write_outside_tmp": 1,
+    "blocked_call": 3,
+    "blocked_import": 2,
+    "dynamic_attribute": 2
+   },
+   "unsafe_executed": 0
+  },
+  "b2": {
+   "tool_calls": 463,
+   "invalid": 4,
+   "valid_call_rate": 0.9913606911447084,
+   "errors": 30,
+   "recovered": 2,
+   "recovery_rate": 0.06666666666666667,
+   "probe_outcomes": {
+    "pass": 114,
+    "fail": 50,
+    "error": 33,
+    "budget": 11,
+    "blocked": 4
+   },
+   "probes_submitted": 201,
+   "probe_verdict_rate": 0.8324873096446701,
+   "unsafe_attempts": 4,
+   "questions_with_unsafe": 2,
+   "unsafe_attempt_rate": 0.01990049751243781,
+   "blocked_rules": {
+    "blocked_call": 1,
+    "write_outside_tmp": 3
+   },
+   "unsafe_executed": 0
+  },
+  "a10none": {
+   "tool_calls": 1120,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 17,
+   "recovered": 5,
+   "recovery_rate": 0.29411764705882354,
+   "probe_outcomes": {
+    "pass": 131,
+    "fail": 28,
+    "blocked": 8,
+    "error": 18
+   },
+   "probes_submitted": 185,
+   "probe_verdict_rate": 0.8983050847457628,
+   "unsafe_attempts": 8,
+   "questions_with_unsafe": 5,
+   "unsafe_attempt_rate": 0.043243243243243246,
+   "blocked_rules": {
+    "dynamic_code": 2,
+    "blocked_call": 6,
+    "blocked_import": 3,
+    "dynamic_attribute": 2
+   },
+   "unsafe_executed": 0
+  },
+  "a10oracle": {
+   "tool_calls": 1060,
+   "invalid": 0,
+   "valid_call_rate": 1.0,
+   "errors": 9,
+   "recovered": 4,
+   "recovery_rate": 0.4444444444444444,
+   "probe_outcomes": {
+    "pass": 128,
+    "fail": 29,
+    "error": 27,
+    "blocked": 5
+   },
+   "probes_submitted": 189,
+   "probe_verdict_rate": 0.8532608695652174,
+   "unsafe_attempts": 5,
+   "questions_with_unsafe": 3,
+   "unsafe_attempt_rate": 0.026455026455026454,
+   "blocked_rules": {
+    "blocked_call": 5,
+    "write_outside_tmp": 1,
+    "blocked_import": 1
+   },
+   "unsafe_executed": 0
+  }
+ },
+ "questions": [
+  "click-1096",
+  "click-1139",
+  "click-1160",
+  "click-1272",
+  "click-1359",
+  "click-1381",
+  "click-1484",
+  "click-1568",
+  "click-1692",
+  "click-1739",
+  "click-1886",
+  "click-1929",
+  "click-1969",
+  "click-2124",
+  "click-2131",
+  "click-2263",
+  "click-2322",
+  "click-2332",
+  "click-2356",
+  "click-2379",
+  "click-2447",
+  "click-2609",
+  "click-2682",
+  "click-2697",
+  "click-2746",
+  "click-2790",
+  "click-2813",
+  "click-2819",
+  "click-2906",
+  "click-2995",
+  "click-3069",
+  "click-3084",
+  "click-3277",
+  "click-3360",
+  "click-3487",
+  "click-3571",
+  "click-3700",
+  "click-457",
+  "click-549",
+  "click-676",
+  "click-729",
+  "marshmallow-1350",
+  "marshmallow-1369",
+  "marshmallow-1506",
+  "marshmallow-2245",
+  "marshmallow-2868",
+  "marshmallow-2900"
+ ],
+ "figures": [
+  "fig_comparisons.png",
+  "fig_categories.png",
+  "fig_risk_coverage.png"
+ ]
+}
