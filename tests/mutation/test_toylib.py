@@ -87,3 +87,15 @@ def test_path_forms_and_bad_paths(toy_session, toy_probes, marks):
     assert r.causal
     bad = mutate_and_run(toy_session, "../../etc/passwd", 1, p.c2_claim)
     assert bad.error and not bad.mutants
+
+
+def test_line_with_nothing_to_mutate_is_untestable_not_rejected(toy_session, toy_probes):
+    """D-47: a `def` line has no applicable operator. The check cannot judge it, so it must not read as rejected."""
+    from tools.mutate import render
+    source = (toy_session.tree / "src" / REL).read_text().splitlines()
+    assert source[27].startswith("def _effective_strict(")
+    r = mutate_and_run(toy_session, REL, 28, toy_probes.c1_claim, [toy_probes.c1_control])
+    assert r.untestable and r.error is None and not r.mutants and not r.causal
+    assert r.to_dict()["untestable"] is True and "UNTESTABLE" in render(r)
+    r88 = mutate_and_run(toy_session, REL, 88, toy_probes.c1_claim, [toy_probes.c1_control])
+    assert not r88.untestable and r88.causal
