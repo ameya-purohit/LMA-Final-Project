@@ -1,5 +1,7 @@
 # Run It, Then Cite It: Execution- and Mutation-Verified Answers to Developer Questions
 
+*Long version. The submitted 8-page report is `docs/final_report.pdf`, built from `docs/report/final_report.tex`.*
+
 **LMA Group Project (CL3.410, Monsoon 2026) · Team Disco 82**
 
 Ameya Purohit, Sunil Kumar, Aditya Narayan Dwivedi, Sourav Nath
@@ -90,7 +92,7 @@ The hypotheses were pre-registered in `PREREGISTRATION.md` before any test run:
    loop, with a shared harness so that baselines differ only in control logic.
 2. An evaluation set of 170 real developer questions (162 after the spot check) from click and marshmallow, each with
    executable gold built only from the developer's merged fix and its test, with no LLM involved.
-3. A pre-registered, paired comparison against five baselines and ablations, with LLM-judge results validated against
+3. A pre-registered, paired comparison against three baselines (B0, B1, B2) and five ablation runs (A1, A2, A3, A10-none, A10-oracle), with LLM-judge results validated against
    two human labellers.
 4. A measurement study of mutation as an automatic test of citation causality, against both developer fix lines and
    human labels.
@@ -194,7 +196,7 @@ test's message and links to the gold lines. Each member answered three yes/no qu
 about library behaviour; does the failing test capture the behaviour the issue asks about; do the gold lines decide that
 behaviour?
 
-**8 of 34 were marked invalid, a disagreement rate of 23.5%.** All 8 failed the second check. In 7, the issue is a
+**8 of 34 were marked invalid (23.5%; called the disagreement rate in the pipeline, though each question had one checker).** All 8 failed the second check. In 7, the issue is a
 feature request that its label did not reveal, so the test only shows that the new feature did not exist yet ("unexpected
 keyword argument", "DID NOT WARN", "DID NOT RAISE"). In the eighth, the fix bundled several changes and the failing test
 belongs to an unrelated one. No question failed the first or third check. The 8 were removed and logged in
@@ -321,7 +323,7 @@ because RQ1 compares procedures with the *same* model, and a tuned model would c
   and the prompt hashes were recorded and the file marked LOCKED; `eval/run.py` refuses the test split otherwise.
 - **Quota.** The binding constraint was about 500 requests per day per Gemini key. We used four members' keys (same
   model and settings). The SQLite cache makes resumed and repeated work free.
-- **Engineering.** 309 unit tests, 18 Docker tests and 3 live tests. Each member's bundle passes its own tests in push
+- **Engineering.** About 350 unit tests, 18 Docker tests and 3 live tests. Each member's bundle passes its own tests in push
   order (`scripts/check_bundle_order.py`).
 
 ### 5.2 Runs performed
@@ -378,7 +380,7 @@ budget.
 |---|---|---|---|
 | A1, no execution | Claims verified by an LLM reading the code; grades at most [R] | More confident errors, especially on doc-related questions | **As predicted in direction:** 36.6% vs 29.7% confident errors (CI [−14.5, +0.7], p = 0.12, not significant); on doc-related questions 36 vs 28. Correctness unchanged (62.8% vs 61.4%) |
 | A2, no mutation | No citation check | Similar correctness, clearly lower causal citation precision | **Opposite:** correctness similar (62.8%), but precision is *higher* without mutation: 44.1% vs 30.6% by humans (§7.2) |
-| A3, flag only | Failed checks are flagged, never re-investigated | Fewer confident errors than B2, lower correctness than ours | Fewer confident errors than ours, 20.0% vs 29.7% (CI [+4.1, +15.9] for ours − A3, p = 0.004), at **equal** correctness (61.4%), by flagging 47 answers instead of 20 |
+| A3, flag only | Failed checks are flagged, never re-investigated | Fewer confident errors than B2, lower correctness than ours | **Half held.** Fewer confident errors than B2 (20.0% vs 31.7%) and than ours (29.7%; CI [+4.1, +15.9] for ours − A3, p = 0.004). But correctness was **equal** to ours (61.4%), not lower. The price was coverage: 47 answers flagged instead of 20 |
 | A6, acceptance rule | any_flip / behavioural / specific, computed from the same mutation runs | `specific` matches humans best | **Opposite:** `specific` matches humans worst (§7.3) |
 | A10-none | No starting material | More steps, similar accuracy | Similar correctness (53.2% vs 53.2%, n = 47); fix-location recall drops 59.6% → 44.7% (+14.9 for ours, CI [+6.4, +25.5], p = 0.016); *fewer* requests (14.2 vs 14.9) |
 | A10-oracle | The whole files the fix changed as starting material | Shows the ceiling | No gain: 51.1% correct, 36.2% causally supported, vs ours 53.2% and 36.2% |
@@ -443,9 +445,10 @@ are secondary.
 | H2 | Confident errors 29.7% vs 31.7%, relative reduction 6.5%, CI of the difference [−10.3, +6.2]; coverage 86.2% vs 100% | **Inconclusive** (CI includes zero; the coverage condition also fails) |
 | H3, by judge | 58.7% vs 59.3%, CI [−7.6, +6.0] | Inconclusive; superseded by the human result |
 
-The two views agree in direction everywhere. The judge's lenience shifts every system's level up, but because it was
-equally lenient across systems, its differences point the same way as the humans'. With 145 questions, H1 is above
-the roughly 120 questions we declared necessary for adequate power. **The full procedure did not beat a ReAct agent
+The two views agree in direction everywhere: the judge mainly raises every system's level. With 145 questions, H1 is
+above the floor of about 120 questions we set in advance, but the pre-registration also states that 120 questions
+give only about 50% power to detect an 8-point gain, so a CI that includes zero would be inconclusive, not negative.
+Here the judge-based H1 interval lies below zero, in B2's favour. **The full procedure did not beat a ReAct agent
 with the same tools**, and its mutation check made citations worse. Before the spot check, on all 150 questions, the
 judge-based H1 gap was −10.7 points (CI [−20.0, −1.3], p = 0.033); the exclusion does not change the conclusion.
 
@@ -470,12 +473,12 @@ even moderate agreement (0.4).
 
 From the traces of the 145 test questions (replays de-duplicated):
 
-| System | Tool calls | Valid-call rate | Errors (recovered) | Probes submitted | Probe verdict rate | Blocked unsafe attempts | Unsafe actions executed |
+| System | Tool calls | Valid-call rate | Errors (recovered) | Probes submitted | Probe verdict rate | Blocked probes | Unsafe actions executed |
 |---|---|---|---|---|---|---|---|
-| Ours | 3,599 | 100.0% | 45 (19) | 604 | 85.2% | 40 (6.0%), in 14 questions | **0** |
-| B2 | 1,521 | 99.7% | 112 (12) | 695 | 88.5% | 26 (3.7%), in 9 questions | **0** |
-| A2 | 1,999 | 100.0% | 35 (13) | 546 | 84.5% | 35 (5.7%) | **0** |
-| A3 | 2,072 | 100.0% | 36 (12) | 459 | 85.1% | 34 (6.5%) | **0** |
+| Ours | 3,599 | 100.0% | 45 (19) | 604 | 85.2% | 36 (6.0%) | **0** |
+| B2 | 1,521 | 99.7% | 112 (12) | 695 | 88.5% | 26 (3.7%) | **0** |
+| A2 | 1,999 | 100.0% | 35 (13) | 546 | 84.5% | 31 (5.7%) | **0** |
+| A3 | 2,072 | 100.0% | 36 (12) | 459 | 85.1% | 30 (6.5%) | **0** |
 
 The *probe verdict rate* is the share of probes that ran and reached pass or fail. Blocked probes are unsafe
 *attempts* refused by the policy before running. Most were harmless in intent, such as creating a file outside `/tmp`
@@ -516,7 +519,8 @@ the name, and was judged partial.
 ### 7.8 Failure analysis: why ours lost to B2
 
 From ours' decision logs on the 145 test questions: 612 probe runs (401 passed, 111 failed, 100 broken), 860 mutation
-checks, 381 proposed replacement citations, 84 claims refuted and 75 revised.
+checks, 381 proposed replacement citations, 84 claims refuted and 75 revised. The decision logs count every run,
+including replays, so these totals differ slightly from the trace-based counts in §7.3 and §7.4.
 
 - **The mutation check discards good citations** (§7.3), and each rejection triggers a search for another line, which
   is often worse.
@@ -667,7 +671,8 @@ rejects most of the lines developers changed.
 | E5 | 321 | 23.3% (10/43) | 5.8% (16/278) | 51.7% | 8.0 | 35,337 | 11.4 |
 
 ¹ E0's yes/no check counts a flip that also changes a control as "no". E1–E6 call that inconclusive. E0's inconclusive
-rate therefore covers only untestable lines, and its two acceptance rates are not directly comparable with E1–E6.
+rate therefore covers only untestable lines. E0's rates also count each distinct line once per question by its first
+recorded verdict, so they are not comparable with E1–E6 or with the per-check rates in §7.3.
 
 **Cost.** The roles use half of E0's requests and less than a fifth of its tokens. B2 uses 9.9 requests and 109,529
 tokens.
@@ -690,7 +695,7 @@ Acceptance on non-fix lines falls from 10.0% (E1) to 5.8% (E5). Acceptance on fi
 - Otherwise, the single-check budget ran out on 10 questions, no candidates were left on 16, and 2 ran no
   experiments.
 
-**Patches.** Patches that the verifier proposed passed the probe re-run 32–46% of the time, varying by configuration
+**Patches.** Patches that the verifier proposed passed the probe re-run 32–45% of the time, varying by configuration
 (22–26 patches each).
 
 **MCP (E6).** E6 produced the same ranking and answer text as E5 on all 47 questions. Its wall time was 62 s against
@@ -715,7 +720,7 @@ Pair mutation, the component aimed at multi-location faults, did not help, becau
 
 | # | Prediction (written before any test run) | Outcome |
 |---|---|---|
-| 1 | R4 beats R1 on Recall@5; R2 alone does not | **Not supported** for R4: hit@5 −3.5 [−12.0, +4.9], p = 0.52. **Supported** for R2: +1.4, p = 0.86. Not predicted: R3 (without rerank) beats R1 |
+| 1 | R4 beats R1 on Recall@5; R2 alone does not | **Not supported** for R4: Recall@5 42.0% vs 46.3% (hit@5 −3.5 [−12.0, +4.9], p = 0.52). **Supported** for R2: Recall@5 47.6% vs 46.3% (hit@5 +1.4, p = 0.86). Not predicted: R3 (without rerank) beats R1 |
 | 2 | E1 is not worse than E0 on line Top-3, and uses fewer requests | Fewer requests: **supported** (7.6 vs 14.9). Top-3: **inconclusive** (−10.6 [−23.4, +2.1]); MRR is significantly lower |
 | 3 | E3 beats E2 on line Top-3 | **Refuted:** −19.1 [−34.0, −4.3], p = 0.035 |
 | 4 | E4 finds ≥ 2 fix ranges on more multi-location questions than E3 | **Not supported:** 21.2% for both; 0 of 95 pairs accepted |
@@ -729,8 +734,8 @@ Pair mutation, the component aimed at multi-location faults, did not help, becau
 - **Retrieval matters, and simple fusion beats reranking.** Hybrid BM25 + dense retrieval with RRF was the one clearly
   positive result (R3, +7.7 points hit@5). The off-the-shelf reranker hurt.
 - **The bottleneck is the causal test, not candidate generation.** The graph found more candidates and the
-  experiment engine tested 3× as many lines. Acceptance on fix lines still stayed near 20%, and pairs added nothing.
-  This agrees with §7.3 and points to the softer, graded causal tests suggested in §10.
+  experiment engine tested 3× as many lines. The three-way check in E1–E5 still accepted only about one in five fix
+  lines, and pairs added nothing. This matches §7.3 (most fix lines are not accepted) and points to the softer, graded causal tests suggested in §10.
 - **Smarter experiment selection saves work** without changing results (E5), and the MCP transport is lossless (E6).
   Both are engineering gains, not accuracy gains.
 
@@ -769,9 +774,10 @@ We asked whether checking every claim by execution and every citation by mutatio
 makes a code question-answering agent more correct and better cited. On real, pre-registered and locked test data, it
 does not. A ReAct agent with the same tools did better on the primary metric, by the judge on 145 questions and by humans
 on 12. The mutation check made citations worse in the humans' eyes, and its verdicts track neither the developers'
-fix lines nor human judgements of causality. Execution itself was useful in a narrower way: without it, confident
-errors rose (A1). Simply flagging failed checks, instead of re-investigating them, cut confident errors by a third at no
-cost in correctness (A3).
+fix lines nor human judgements of causality. Execution may still help in a narrower way: without it, confident
+errors rose from 29.7% to 36.6% (A1), though this difference is not significant. Simply flagging failed checks, instead
+of re-investigating them, cut confident errors by a third at the same correctness (A3), but the agent then answered
+confidently on fewer questions (coverage 67.6% against 86.2%).
 
 Three lessons follow. **First,** "flip the switch" is a weak test of causality in real code. A line can matter without
 any single mutant changing exactly one behaviour, so a specificity control that works on a planted library rejects
