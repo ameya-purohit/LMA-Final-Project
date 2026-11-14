@@ -208,7 +208,9 @@ See [demo/README.md](demo/README.md) for what each page needs and a 5-minute dem
 
 ## Results
 
-The full write-up is [docs/final_report.md](docs/final_report.md); the detailed numbers are in
+The submitted report is [docs/final_report.pdf](docs/final_report.pdf) (8 pages, LaTeX source in
+[docs/report/final_report.tex](docs/report/final_report.tex)); a longer version is
+[docs/final_report.md](docs/final_report.md), and the detailed numbers are in
 [docs/results.md](docs/results.md), generated from `results/summary/analysis_main_test/report.md`. In short, on the
 145 test questions left after the spot check, the full procedure **did not beat** the ReAct agent with the same tools
 (causally-supported answers: ours 40.0% vs B2 49.7% by the judge; 25.0% vs 41.7% on the 12 human-labelled questions,
