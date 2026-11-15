@@ -4,7 +4,7 @@
 
 **LMA Group Project (CL3.410, Monsoon 2026) · Team Disco 82**
 
-Ameya Purohit, Sunil Kumar, Aditya Narayan Dwivedi, Sourav Nath
+Ameya Purohit (2025202006), Sunil Kumar (2025201099), Aditya Narayan Dwivedi (2025201026), Sourav Nath (2025201054)
 
 **Code and data:** https://github.com/ameya-purohit/LMA-Final-Project. The repository README gives step-by-step
 reproduction. Detailed result tables are in `docs/results.md`, and every design decision is logged in `DECISIONS.md`.
